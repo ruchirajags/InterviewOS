@@ -153,13 +153,3 @@ How should the project be verified against the minimum requirements?
 - Flask test-client smoke test for `/api/interview`.
 - Candidate API smoke test for `/api/candidates`.
 
-## Maintenance Instructions
-
-Keep this file updated during development. For each meaningful AI-assisted change, add:
-
-- The prompt or task given to AI.
-- The useful output or decision taken from AI.
-- The files changed.
-- Any human edits or final decisions made by the team.
-
-Do not include secrets, private API keys, or irrelevant chat history.

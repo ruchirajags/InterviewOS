@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterviewOS Room</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="/"><div class="logo-icon">AI</div><span class="logo-text">InterviewOS</span></a>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <span class="meta-badge" id="roleDisplay">{{ interview.role if interview else 'AI Cohort Interview' }}</span>
+        <span class="timer-display" id="timer">20:00</span>
+    </div>
+</header>
+
+<input type="hidden" id="metaRole" value="{{ interview.role if interview else 'AI Cohort Graduate' }}">
+<input type="hidden" id="metaName" value="{{ interview.candidate_name if interview else 'Candidate' }}">
+<input type="hidden" id="metaCandidateId" value="{{ interview.candidate_id if interview else '' }}">
+
+<main class="container">
+    <div id="statusMsg" class="status-msg fade-in"></div>
+    <div class="meta-row" style="margin-top:20px;">
+        <span class="meta-badge">Candidate: {{ interview.candidate_name if interview else 'Candidate' }}</span>
+        <span class="meta-badge">Room: {{ room_id }}</span>
+        <span class="meta-badge" id="questionProgress">Question 0 of 10</span>
+        <span class="meta-badge" id="topicBadge">Topic pending</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+
+    <div class="interview-layout">
+        <div class="interview-left">
+            <div class="video-grid">
+                <div class="video-wrapper">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="video-label">You</div>
+                </div>
+                <div class="video-wrapper">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="video-placeholder" id="remotePlaceholder">
+                        <div class="video-placeholder-icon">AI</div>
+                        <span>AI interviewer presence</span>
+                    </div>
+                    <div class="video-label">AI Interviewer</div>
+                </div>
+            </div>
+            <div class="control-bar">
+                <button class="btn btn-ghost btn-sm" id="muteBtn" onclick="toggleMute()">Mute</button>
+                <button class="btn btn-ghost btn-sm" id="videoBtn" onclick="toggleVideo()">Stop Video</button>
+                <button class="btn btn-primary" id="startBtn" onclick="startInterview()">Start Interview</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmEnd()">End Session</button>
+            </div>
+            <div class="card card-elevated journey-card">
+                <h3>Interview Journey</h3>
+                <div id="journeyList" class="journey-list"><span>Start the interview to generate the plan.</span></div>
+            </div>
+        </div>
+
+        <div class="interview-right">
+            <div class="question-box">
+                <div class="question-header">
+                    <span class="question-label">AI Interviewer</span>
+                    <span class="ai-indicator" id="aiIndicator">Ready</span>
+                </div>
+                <p id="question">Click Start Interview to begin the personalized AI Cohort interview.</p>
+                <audio id="aiVoice" preload="none"></audio>
+            </div>
+
+            <div class="card card-elevated" style="margin-bottom:16px;">
+                <label class="form-label" for="typedAnswer">Candidate Answer</label>
+                <textarea class="form-input" id="typedAnswer" rows="6" placeholder="Type your answer here. Voice recording is still available as an optional input."></textarea>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                    <button class="btn btn-primary" id="submitAnswerBtn" onclick="submitTypedAnswer()" disabled>Submit Answer</button>
+                    <button class="btn btn-success" id="recordBtn" onclick="startRecording()" disabled>Record Answer</button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopRecording()" disabled>Stop & Submit</button>
+                </div>
+                <div class="transcript-box" id="liveTranscript" style="display:none;"></div>
+                <div class="answer-display" id="answerDisplay"></div>
+            </div>
+
+            <div class="card report-section" id="reportSection">
+                <div class="report-header"><h3>AI Engineering Readiness Report</h3><span class="report-badge">Complete</span></div>
+                <div id="reportContent"></div>
+                <a class="btn btn-ghost btn-sm" id="downloadReportBtn" style="margin-top:16px;" href="/api/interview/{{ room_id }}/report/download">Download Report</a>
+                <button class="btn btn-ghost btn-sm" style="margin-top:16px;" onclick="window.print()">Print</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="permissionModal" class="modal-overlay">
+    <div class="modal-content card">
+        <h3>Optional Camera and Microphone</h3>
+        <p style="color:var(--text-secondary); margin-bottom:20px;">Video and voice make the room feel live, but the text interview works even if you skip permissions.</p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="requestPermissions()">Enable Media</button>
+            <button class="btn btn-ghost" onclick="skipPermissions()">Continue Text Only</button>
+        </div>
+        <div id="modalError" style="color:var(--danger); font-size:0.85rem; margin-top:16px; display:none;"></div>
+    </div>
+</div>
+
+<script>const roomId = "{{ room_id }}";</script>
+<script src="/static/js/socket.js"></script>
+<script src="/static/js/webrtc.js"></script>
+<script src="/static/js/audio.js"></script>
+<script src="/static/js/interview.js"></script>
+<script>
+function skipPermissions(){ document.getElementById("permissionModal").style.display = "none"; }
+async function requestPermissions(){
+    const ok = await startMedia();
+    if (ok) { document.getElementById("permissionModal").style.display = "none"; joinRoom(roomId); showStatus("Media enabled. You can start the interview.", "success"); }
+    else { document.getElementById("modalError").textContent = "Permission denied. You can continue in text mode."; document.getElementById("modalError").style.display = "block"; }
+}
+function confirmEnd(){ if(confirm("End the interview and generate the report?")) endInterview(); }
+</script>
+</body>
+</html>

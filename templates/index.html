@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="InterviewOS adaptive AI interviewer for AI Cohort graduates.">
+    <title>InterviewOS - AI Cohort Interviewer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="/">
+        <div class="logo-icon">AI</div>
+        <span class="logo-text">InterviewOS</span>
+    </a>
+    <span class="header-badge">Cohort Demo</span>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <div class="hero-eyebrow"><span>Adaptive Interview Agent</span></div>
+        <h1 class="hero-title">Build the interviewer,<br>not the interview.</h1>
+        <p class="hero-subtitle">
+            InterviewOS reads each learner's 31-day AI Cohort journey, plans a personalized technical interview,
+            asks adaptive follow-ups, and generates a downloadable readiness report.
+        </p>
+        <a href="#candidates" class="btn btn-primary btn-lg">Open Candidate Dashboard</a>
+    </section>
+
+    <section id="candidates" style="padding: 20px 0 70px;">
+        <div class="section-head">
+            <div>
+                <h2>Candidate Dashboard</h2>
+                <p style="color: var(--text-secondary);">Select a cohort learner to create a dedicated interview room.</p>
+            </div>
+        </div>
+        <div id="candidateGrid" class="candidate-grid"></div>
+    </section>
+</main>
+
+<script>
+async function loadCandidates() {
+    const grid = document.getElementById("candidateGrid");
+    grid.innerHTML = "<p style='color: var(--text-secondary);'>Loading cohort profiles...</p>";
+    const res = await fetch("/api/candidates");
+    const data = await res.json();
+    grid.innerHTML = "";
+    data.candidates.forEach(candidate => {
+        const member = candidate.member || {};
+        const summary = candidate.summary || {};
+        const analysis = summary.analysis || {};
+        const card = document.createElement("article");
+        card.className = "card candidate-card fade-in";
+        card.innerHTML = `
+            <div class="candidate-topline">
+                <div>
+                    <h3>${member.name}</h3>
+                    <p>${member.jobRole || "AI Cohort Graduate"} · ${member.yearsExperience || 0} yrs</p>
+                </div>
+                <span class="meta-badge">${analysis.difficulty || "intermediate"}</span>
+            </div>
+            <div class="candidate-stats">
+                <span>${(analysis.completed_days || []).length} completed days</span>
+                <span>${candidate.signals?.commitDays || 0} commit days</span>
+                <span>${candidate.signals?.missionsFirstTry || 0} first try</span>
+            </div>
+            <div class="topic-list"><strong>Strong:</strong> ${(summary.strong_topics || []).slice(0,3).join(", ") || "Needs interview evidence"}</div>
+            <div class="topic-list"><strong>Probe:</strong> ${(summary.probe_topics || []).slice(0,3).join(", ") || "Production tradeoffs"}</div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:18px;" onclick='createRoom(${JSON.stringify(candidate)})'>Start Interview</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+async function createRoom(candidate) {
+    const member = candidate.member || {};
+    const roomId = `${member.id}-${Math.random().toString(36).substring(2, 6)}`.toUpperCase();
+    const res = await fetch("/api/interview/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            room_id: roomId,
+            candidate_id: member.id,
+            candidate_name: member.name,
+            role: member.jobRole || "AI Cohort Graduate"
+        })
+    });
+    const data = await res.json();
+    if (data.status === "created") window.location.href = `/interview/${data.room_id}`;
+    else alert(data.error || "Could not create interview room");
+}
+
+loadCandidates();
+</script>
+</body>
+</html>

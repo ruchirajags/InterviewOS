@@ -6,108 +6,160 @@ InterviewOS - Adaptive AI Interview Agent for AI Cohort graduates.
 
 ## AI Tools Used
 
-- ChatGPT / Codex for architecture planning, implementation guidance, debugging, and documentation.
-- Add any other tools used by the team during the hackathon here.
+- ChatGPT / Codex for architecture planning, implementation guidance, debugging support, and documentation refinement.
+- AI assistance was used to reason about system design, API flow, prompt structure, adaptive interview logic, and report formatting.
 
 ## Goal
 
-Build an AI interviewer that uses curriculum and candidate journey JSON to conduct a realistic multi-turn technical interview, adapt follow-up questions, maintain context by `sessionId`, and produce structured final feedback.
+Build an AI interviewer that uses the supplied curriculum and candidate journey JSON to conduct a realistic multi-turn technical interview, adapt follow-up questions, maintain session context by `sessionId`, and produce structured final feedback.
 
-## Prompt Log
+## AI Usage Log
 
-### 1. Problem Understanding and Scope
-
-**Prompt:**
-We have less than 20 hours for a hackathon. The problem asks us to build an AI Interview Agent for a 31-day AI Cohort using curriculum JSON, candidate profiles, and a required API contract. What should we build to satisfy the requirements without overengineering?
-
-**AI Output Used:**
-- Use an InterviewState-driven architecture.
-- Keep in-memory/session-based state for the required endpoint.
-- Build text interview first; keep video/audio secondary.
-- Guarantee 8+ questions and 4+ curriculum days.
-
-**Human Decisions:**
-- Reuse the existing VivaAI interview room boilerplate.
-- Preserve video/audio features but make text the reliable core.
-
-### 2. Architecture Planning
+### 1. Product Architecture
 
 **Prompt:**
-How should we structure the interviewer so it feels adaptive and not like a scripted questionnaire?
+Design a clean architecture for an AI Interview Agent that uses curriculum JSON, candidate profiles, and a required `POST /api/interview` endpoint. The system must conduct an adaptive multi-turn interview and return structured feedback.
 
 **AI Output Used:**
-- Candidate Analyzer
-- Curriculum Retriever
-- Interview Planner
-- Answer Evaluator
-- Decision Engine
-- Feedback Generator
+- InterviewState-based architecture.
+- Candidate Analyzer, Curriculum Retriever, Interview Planner, Answer Evaluator, Decision Engine, and Feedback Generator.
+- Text-first interview flow with optional voice/video enhancement.
 
-**Files Changed:**
-- `services/cohort_data.py`
+**Implemented In:**
+- `services/interview_engine.py`
 - `services/candidate_analyzer.py`
+- `services/cohort_data.py`
+
+---
+
+### 2. Candidate Journey Interpretation
+
+**Prompt:**
+How should candidate profile data such as completed missions, attempts, skipped topics, and learning signals be interpreted for personalized technical interviews?
+
+**AI Output Used:**
+- Completed missions determine eligible interview topics.
+- First-attempt missions indicate stronger areas.
+- High-attempt or failed missions become probe topics.
+- Skipped topics are avoided or asked only at a high-level awareness depth.
+- Candidate difficulty is derived from completion and first-try signals.
+
+**Implemented In:**
+- `services/candidate_analyzer.py`
+
+---
+
+### 3. Interview Planning
+
+**Prompt:**
+Create a reliable interview plan that guarantees at least 8 questions across at least 4 curriculum days while still feeling personalized.
+
+**AI Output Used:**
+- Plan around high-value AI engineering days such as embeddings, vector databases, retrieval, prompting, backend APIs, agents, MCP, deployment, and observability.
+- Use a 10-question flow to comfortably exceed the minimum requirement.
+- Include adaptive follow-ups without allowing the interview to get stuck on one topic.
+
+**Implemented In:**
 - `services/interview_engine.py`
 
-### 3. Candidate JSON Interpretation
+---
+
+### 4. Adaptive Follow-Up Logic
 
 **Prompt:**
-How do we interpret candidate missions, attempts, skipped topics, and signals from the supplied JSON?
+Design a simple decision engine for technical interview follow-ups based on answer quality.
 
 **AI Output Used:**
-- Attempts <= 1 become strong topics.
-- Attempts >= 3 become probe topics.
-- Skipped topics are avoided or treated carefully.
-- Missions completed and first-try count determine difficulty.
+- Evaluate answers using topic-specific signals.
+- Strong answers lead to deeper production-focused questions.
+- Partial answers lead to clarification questions.
+- Weak answers lead to foundational probes.
+- Topic depth limits prevent infinite follow-ups.
 
-**Files Changed:**
-- `services/candidate_analyzer.py`
+**Implemented In:**
+- `services/interview_engine.py`
 
-### 4. API Contract
+---
+
+### 5. API Contract
 
 **Prompt:**
-Implement the required `POST /api/interview` endpoint. It must start with `{ sessionId, candidate }`, continue with `{ sessionId, message }`, and end with `{ reply, done, feedback }`.
+Implement the required hackathon API contract for `POST /api/interview` with start, conversation, and final feedback responses.
 
 **AI Output Used:**
-- Added exact endpoint.
-- Kept session memory keyed by `sessionId`.
-- Returned final feedback in required shape.
+- Start request accepts `sessionId` and `candidate`.
+- Conversation request accepts `sessionId` and `message`.
+- Final response returns `done: true` and a `feedback` object containing `summary`, `strengths`, `gaps`, and `next`.
 
-**Files Changed:**
+**Implemented In:**
 - `routes/interview_routes.py`
 - `utils/validation.py`
 
-### 5. Interview Room UI
+---
+
+### 6. Interview Room Experience
 
 **Prompt:**
-Convert the existing VivaAI interview room into a text-first adaptive cohort interview room while preserving video/audio features.
+Design a clean interface for a personalized technical interview with candidate selection, interview progress, current topic, typed answers, optional voice input, and final report output.
 
 **AI Output Used:**
-- Candidate-specific room creation.
-- Question progress and topic badge.
+- Candidate dashboard generated from candidate JSON.
+- Candidate-specific interview room.
+- Topic and question progress indicators.
 - Interview journey sidebar.
-- Typed answer box with optional voice recording.
-- Final report rendering and download button.
+- Text answer flow with optional voice recording.
+- Final report section with download support.
 
-**Files Changed:**
+**Implemented In:**
 - `templates/index.html`
 - `templates/interview_room.html`
 - `static/js/interview.js`
 - `static/css/style.css`
 
-### 6. Report Generation
+---
+
+### 7. Feedback Report
 
 **Prompt:**
-How should the final report be structured for judges and candidates?
+Create a final technical readiness report format that is concise, actionable, and aligned with the required feedback schema.
 
 **AI Output Used:**
-- Summary
-- Strengths
-- Gaps
-- Recommended next steps
-- Downloadable text report
+- Summary of interview performance.
+- Strengths based on strong answer areas.
+- Gaps based on weak or missing concepts.
+- Recommended next steps for interview preparation.
+- Downloadable report route.
 
-**Files Changed:**
+**Implemented In:**
+- `services/interview_engine.py`
 - `routes/interview_routes.py`
-- `models/interview.py`
 
+---
 
+### 8. Validation and Testing
+
+**Prompt:**
+How should the project be verified against the minimum requirements?
+
+**AI Output Used:**
+- Confirm `/api/interview` starts with a candidate object.
+- Confirm subsequent turns use only `sessionId` and `message`.
+- Confirm interview reaches completion after 10 questions.
+- Confirm final feedback includes `summary`, `strengths`, `gaps`, and `next`.
+- Confirm candidate dashboard loads from JSON.
+
+**Verification Performed:**
+- Python syntax compilation.
+- Flask test-client smoke test for `/api/interview`.
+- Candidate API smoke test for `/api/candidates`.
+
+## Maintenance Instructions
+
+Keep this file updated during development. For each meaningful AI-assisted change, add:
+
+- The prompt or task given to AI.
+- The useful output or decision taken from AI.
+- The files changed.
+- Any human edits or final decisions made by the team.
+
+Do not include secrets, private API keys, or irrelevant chat history.

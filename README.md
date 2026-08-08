@@ -85,7 +85,7 @@ POST /api/interview
 
 - Flask
 - Flask-SocketIO
-- SQLite
+- In-memory session state
 - Vanilla HTML/CSS/JavaScript
 - Sarvam AI integrations retained for optional voice/STT features
 

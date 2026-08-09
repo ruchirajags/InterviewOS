@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, request, jsonify, render_template, Response
 from models.interview import (
     create_interview,
@@ -130,10 +131,17 @@ def cohort_interview():
         state = interview_engine.sessions.get(data.sessionId)
 
         if state:
+            qa_history = []
+            for index, item in enumerate(state.transcript):
+                enriched = dict(item)
+                if index < len(state.evaluations):
+                    enriched["evaluation"] = state.evaluations[index]
+                qa_history.append(enriched)
+
             save_report(
                 data.sessionId,
                 json.dumps(result.get("feedback", {})),
-                json.dumps(state.transcript),
+                json.dumps(qa_history),
             )
 
     return jsonify(result)
@@ -218,7 +226,6 @@ def save(room_id):
             "error": str(e)
         }), 500
 
-
 @interview_bp.route(
     "/api/interview/<room_id>/report/download",
     methods=["GET"],
@@ -233,7 +240,6 @@ def download_report(room_id):
 
     try:
         feedback = json.loads(interview["report"])
-
     except Exception:
         feedback = {
             "summary": interview["report"],
@@ -242,32 +248,71 @@ def download_report(room_id):
             "next": [],
         }
 
-    lines = [
-        "AI Engineering Readiness Report",
-        f"Candidate: {interview['candidate_name']}",
-        f"Session: {room_id}",
-        "",
-        "Summary:",
-        feedback.get("summary", ""),
-        "",
-        "Strengths:",
-        *[f"- {item}" for item in feedback.get("strengths", [])],
-        "",
-        "Gaps:",
-        *[f"- {item}" for item in feedback.get("gaps", [])],
-        "",
-        "Next Steps:",
-        *[f"- {item}" for item in feedback.get("next", [])],
-    ]
+    try:
+        transcript = json.loads(interview.get("qa_history") or "[]")
+    except Exception:
+        transcript = []
 
-    content = "\n".join(lines)
+    question_analysis = []
+    total_score = 0
+    scored_count = 0
+
+    for item in transcript:
+        evaluation = item.get("evaluation", {})
+        score = evaluation.get("score", "N/A")
+
+        if isinstance(score, (int, float)):
+            total_score += score
+            scored_count += 1
+
+        missing = evaluation.get("missing_concepts", [])
+        if isinstance(missing, list):
+            missing = ", ".join(missing) if missing else "No major missing concepts detected."
+
+        question_analysis.append({
+            "day": item.get("day", "N/A"),
+            "topic": item.get("topic", "Topic"),
+            "module": item.get("module", "AI Cohort"),
+            "question": item.get("question", ""),
+            "answer": item.get("answer", ""),
+            "score": score,
+            "expected_direction": evaluation.get(
+                "expected_direction",
+                "Explain the concept, tradeoffs, and production implications."
+            ),
+            "missing_concepts": missing or "No major missing concepts detected.",
+        })
+
+    questions_answered = len([item for item in transcript if item.get("answer")])
+    covered_days = sorted({str(item.get("day")) for item in transcript if item.get("day")})
+
+    overall_score = (
+        f"{total_score / scored_count:.1f}/5"
+        if scored_count
+        else "See summary"
+    )
+
+    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    filename = f"{datetime.now().strftime('%Y-%m-%d')}-InterviewOS-readiness-report.html"
+
+    html = render_template(
+        "report_download.html",
+        filename=filename,
+        candidate_name=interview.get("candidate_name") or "Candidate",
+        role=interview.get("role") or "AI Cohort Interview",
+        session_id=room_id,
+        questions_answered=questions_answered,
+        days_covered=", ".join(covered_days) if covered_days else "N/A",
+        overall_score=overall_score,
+        generated_at=generated_at,
+        feedback=feedback,
+        question_analysis=question_analysis,
+    )
 
     return Response(
-        content,
-        mimetype="text/plain",
+        html,
+        mimetype="text/html",
         headers={
-            "Content-Disposition": (
-                f"attachment; filename={room_id}-readiness-report.txt"
-            )
+            "Content-Disposition": f"attachment; filename={filename}"
         },
     )

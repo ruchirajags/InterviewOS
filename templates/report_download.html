@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ filename }}</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #f4f1ea;
+            color: #171717;
+            font-family: Arial, sans-serif;
+            line-height: 1.55;
+        }
+
+        .page {
+            width: min(1080px, calc(100% - 40px));
+            margin: 32px auto;
+            background: #fff;
+            border: 1px solid #ded8cc;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(20, 20, 20, 0.08);
+        }
+
+        header, footer {
+            background: #fbfaf7;
+            border-bottom: 1px solid #e7e1d7;
+            padding: 30px 42px;
+        }
+
+        footer {
+            border-top: 1px solid #e7e1d7;
+            border-bottom: 0;
+            text-align: center;
+            color: #777064;
+            font-size: 12px;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #e8604a;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 34px;
+            line-height: 1.1;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        p { margin: 0 0 10px; }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 22px 42px;
+            border-bottom: 1px solid #e7e1d7;
+        }
+
+        .metric, .panel, .qa-card, .summary {
+            border: 1px solid #ebe5da;
+            border-radius: 16px;
+            background: #fbfaf7;
+        }
+
+        .metric {
+            padding: 14px;
+        }
+
+        .metric-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #777064;
+        }
+
+        .metric-value {
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .content {
+            padding: 32px 42px 40px;
+        }
+
+        section {
+            margin-bottom: 28px;
+        }
+
+        .summary {
+            padding: 20px;
+            background: #f7faf7;
+            border-color: #dceedd;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            padding: 18px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 7px;
+        }
+
+        .qa-card {
+            margin-bottom: 18px;
+            padding: 20px;
+            background: #fff;
+        }
+
+        .qa-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee8dd;
+        }
+
+        .qa-topic {
+            font-weight: 800;
+        }
+
+        .qa-score {
+            white-space: nowrap;
+            font-weight: 800;
+            color: #e8604a;
+        }
+
+        .qa-label {
+            margin-top: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #777064;
+        }
+
+        .answer {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #f7f5ef;
+            border: 1px solid #ebe5da;
+            white-space: pre-wrap;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        button {
+            border: 1px solid #ded8cc;
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        @media print {
+            body { background: #fff; }
+            .page {
+                width: 100%;
+                margin: 0;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .actions { display: none; }
+        }
+
+        @media (max-width: 760px) {
+            .page { width: calc(100% - 20px); margin: 10px auto; }
+            header, .content, footer, .meta {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .meta, .two-col { grid-template-columns: 1fr; }
+            h1 { font-size: 27px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header>
+            <p class="eyebrow">InterviewOS Readiness Report</p>
+            <h1>AI Engineering Readiness Report</h1>
+        </header>
+
+        <div class="meta">
+            <div class="metric">
+                <span class="metric-label">Candidate</span>
+                <span class="metric-value">{{ candidate_name }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Role</span>
+                <span class="metric-value">{{ role }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Questions</span>
+                <span class="metric-value">{{ questions_answered }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Overall Score</span>
+                <span class="metric-value">{{ overall_score }}</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="actions">
+                <button onclick="window.print()">Print / Save PDF</button>
+            </div>
+
+            <section class="summary">
+                <h2>Summary</h2>
+                <p>{{ feedback.summary }}</p>
+                <p><strong>Session:</strong> {{ session_id }}</p>
+                <p><strong>Curriculum days covered:</strong> {{ days_covered }}</p>
+                <p><strong>Generated:</strong> {{ generated_at }}</p>
+            </section>
+
+            <section class="two-col">
+                <div class="panel">
+                    <h2>Strengths</h2>
+                    <ul>
+                        {% for item in feedback.strengths %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <h2>Gaps</h2>
+                    <ul>
+                        {% for item in feedback.gaps %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Recommended Next Steps</h2>
+                <ul>
+                    {% for item in feedback.next %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section>
+                <h2>Question-by-Question Analysis</h2>
+
+                {% for item in question_analysis %}
+                <article class="qa-card">
+                    <div class="qa-top">
+                        <div>
+                            <div class="qa-topic">Day {{ item.day }} · {{ item.topic }}</div>
+                            <div>{{ item.module }}</div>
+                        </div>
+                        <div class="qa-score">{{ item.score }}/5</div>
+                    </div>
+
+                    <div class="qa-label">Question</div>
+                    <p>{{ item.question }}</p>
+
+                    <div class="qa-label">Candidate Answer</div>
+                    <div class="answer">{{ item.answer }}</div>
+
+                    <div class="qa-label">Expected Answer Direction</div>
+                    <p>{{ item.expected_direction }}</p>
+
+                    <div class="qa-label">Missing Concepts</div>
+                    <p>{{ item.missing_concepts }}</p>
+                </article>
+                {% endfor %}
+            </section>
+        </div>
+
+        <footer>
+            {{ generated_at }} · InterviewOS
+        </footer>
+    </main>
+</body>
+</html>

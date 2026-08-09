@@ -7,7 +7,31 @@
     <meta name="description"
         content="InterviewOS candidate dashboard — select a cohort learner to begin an adaptive AI interview.">
     <title>InterviewOS — Candidate Dashboard</title>
-    <link rel="stylesheet" href="/static/css/dashboard.css?v=polish-room-final">
+    <link rel="stylesheet" href="/static/css/dashboard.css?v=question-readable-final">
+    <style>
+    #question {
+        font-size: 22px !important;
+        line-height: 1.6 !important;
+        font-weight: 500 !important;
+        color: var(--db-ink) !important;
+    }
+
+    .db-ws-ai-headline {
+        font-size: 24px !important;
+        line-height: 1.25 !important;
+    }
+
+    @media (max-width: 760px) {
+        #question {
+            font-size: 18px !important;
+        }
+
+        .db-ws-ai-headline {
+            font-size: 21px !important;
+        }
+    }
+</style>
+</head>
 
 <body class="db-page" id="dbPage">
 
@@ -207,8 +231,7 @@
                             <div class="db-control-bar">
                                 <button class="db-control-btn" id="muteBtn" onclick="toggleMute()">Mute</button>
                                 <button class="db-control-btn" id="videoBtn" onclick="toggleVideo()">Stop Video</button>
-                                <button class="db-control-btn danger" id="endSessionBtn" onclick="confirmEnd()">End
-                                    Session</button>
+                                <button class="db-control-btn danger" id="endSessionBtn" onclick="confirmEnd()">End Early</button>
                             </div>
                         </div>
 
@@ -477,6 +500,11 @@
 
             applyFilters(); // re-render with selection highlight
             resetInterviewUI();
+            const endBtn = document.getElementById("endSessionBtn");
+            if (endBtn) {
+                endBtn.textContent = "End Early";
+                endBtn.disabled = false;
+            }
 
             // Offer camera/mic once per session, the first time a candidate is opened.
             if (!mediaRequested) {
@@ -577,7 +605,11 @@
                 }
             } else { document.getElementById("permissionModal").classList.remove("open"); }
         }
-        function confirmEnd() { if (confirm("End the interview and generate the report?")) { if (typeof endInterview === "function") endInterview(); } }
+        function confirmEnd() {
+            if (confirm("End this interview early? A preview will be shown, but the downloadable readiness report is generated after completing the full interview.")) {
+                if (typeof endInterview === "function") endInterview();
+            }
+        }
 
         loadCandidates();
     </script>
@@ -686,6 +718,9 @@
 
                 re.style.display = "block";
 
+                const reportActions = document.querySelector(".db-report-actions");
+                if (reportActions) reportActions.style.display = "flex";
+
                 const block = (title, items) => `
                     <h4>${title}</h4>
                     <ul>${(items || []).map(item => `<li>${item}</li>`).join("")}</ul>
@@ -705,6 +740,11 @@
                 }
 
                 re.scrollIntoView({ behavior: "smooth", block: "start" });
+                const endBtn = document.getElementById("endSessionBtn");
+                if (endBtn) {
+                    endBtn.textContent = "Interview Complete";
+                    endBtn.disabled = true;
+                }
             };
 
         // ── handleInterviewResponse patch ─────────────────────────────

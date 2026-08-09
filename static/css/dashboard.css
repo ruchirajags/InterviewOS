@@ -2004,4 +2004,31 @@
     #candidatePanel.db-report-mode .db-report {
         padding: 24px 18px;
     }
+    /* Question readability polish */
+.db-page #question,
+.db-page .db-ws-ai-sub#question {
+    font-size: 22px !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
+    color: var(--db-ink) !important;
+}
+
+.db-page .db-ws-ai-headline,
+.db-page #aiHeadline {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+}
+
+@media (max-width: 760px) {
+    .db-page #question,
+    .db-page .db-ws-ai-sub#question {
+        font-size: 18px !important;
+    }
+
+    .db-page .db-ws-ai-headline,
+    .db-page #aiHeadline {
+        font-size: 21px !important;
+    }
+}
+    
 }

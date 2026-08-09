@@ -287,13 +287,25 @@ async function endInterview() {
     }
 
     displayFeedback({
-        summary: "Interview ended before completion. Complete the full adaptive interview to generate a scored readiness report.",
+        summary: "Interview ended early. Complete the full adaptive interview to generate and download the scored readiness report.",
         strengths: questionHistory.length
             ? ["Started the interview and engaged with the technical prompts."]
             : ["No evaluated answers were submitted."],
         gaps: ["The interview was ended before enough evidence was collected."],
         next: ["Restart the interview and answer all questions to receive a complete report."]
     });
+
+    const downloadBtn = document.getElementById("downloadReportBtn");
+    if (downloadBtn) downloadBtn.style.display = "none";
+
+    const reportActions = document.querySelector(".db-report-actions");
+    if (reportActions) reportActions.style.display = "none";
+
+    const endBtn = document.getElementById("endSessionBtn");
+    if (endBtn) {
+        endBtn.textContent = "Ended Early";
+        endBtn.disabled = true;
+    }
 
     showStatus("Interview ended. No additional answers were generated.", "warning");
 }

@@ -181,29 +181,17 @@
 }
 
 .db-logo {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 2px;
-    font-family: var(--db-font-display);
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    position: relative;
+    justify-content: center;
+    height: 100%;
 }
 
-.db-logo .db-logo-os {
-    position: relative;
-    padding-right: 8px;
-}
-
-.db-logo .db-logo-os::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    right: 0;
-    width: 5px;
-    height: 5px;
-    background: var(--db-accent);
+.db-logo img {
+    display: block;
+    height: 42px; /* ~80% of the 52px navbar height */
+    width: auto;
+    object-fit: contain;
 }
 
 .db-nav {

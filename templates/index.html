@@ -59,24 +59,19 @@
         }
 
         .brand {
-            font-family: "Bebas Neue", sans-serif;
-            font-size: 1.75rem;
-            letter-spacing: 0.03em;
+            display: block;
+            width: auto;
+            max-width: none;
+            font-size: inherit;
+            transform: none;
+            overflow: visible;
         }
 
-        .brand span {
-            position: relative;
-            padding-right: 10px;
-        }
-
-        .brand span::after {
-            content: "";
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            top: -3px;
-            right: 0;
-            background: var(--lime);
+        .brand img {
+            display: block;
+            height: 58px;
+            width: auto;
+            object-fit: contain;
         }
 
         .nav-links {
@@ -668,6 +663,9 @@
         }
 
         @media (max-width: 900px) {
+            .brand img {
+                height: 56px;
+            }
             .hero {
                 min-height: auto;
                 padding-top: 42px;
@@ -704,6 +702,7 @@
 
         @media (max-width: 560px) {
             .nav { height: 66px; }
+            .brand img { height: 52px; }
             .dashboard-link { padding: 9px 12px; }
             h1 { font-size: clamp(3.5rem, 18vw, 5.5rem); }
             .copy { font-size: 0.96rem; }
@@ -727,7 +726,9 @@
 <body>
     <div class="nav-wrap">
         <div class="shell nav">
-            <a class="brand" href="#"><span>Interview</span>OS</a>
+            <a class="brand" href="#">
+                <img src="{{ url_for('static', filename='images/interviewos-logo.png') }}" alt="InterviewOS">
+            </a>
             <div class="nav-links">
                 <a class="dashboard-link" href="/dashboard">Dashboard -></a>
             </div>

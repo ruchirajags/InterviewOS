@@ -104,28 +104,19 @@
 }
 
 .landing-page .l-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    font-family: var(--l-display);
-    font-size: 1.5rem;
-    letter-spacing: 0.02em;
-    position: relative;
+    display: block;
+    width: auto;
+    max-width: none;
+    font-size: inherit;
+    transform: none;
+    overflow: visible;
 }
 
-.landing-page .l-logo .l-logo-os {
-    position: relative;
-    padding-right: 10px;
-}
-
-.landing-page .l-logo .l-logo-os::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    right: 0;
-    width: 7px;
-    height: 7px;
-    background: var(--l-lime);
+.landing-page .l-logo img {
+    display: block;
+    height: 60px;
+    width: auto;
+    object-fit: contain;
 }
 
 .landing-page .l-nav {
@@ -1210,6 +1201,10 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 960px) {
+    .landing-page .l-logo img {
+        height: 46px;
+    }
+
     .landing-page .l-hero {
         grid-template-columns: 1fr;
     }

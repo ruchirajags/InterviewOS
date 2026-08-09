@@ -1,0 +1,1462 @@
+/* ==========================================================================
+   InterviewOS — Landing Page Stylesheet
+   Scoped entirely under .landing-page so it never leaks into
+   interview_room.html / create_interview.html, which still use
+   the shared dark theme in style.css.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Tokens (scoped, not :root, so nothing collides with style.css) ──── */
+.landing-page {
+    --l-bg: #F5F3EC;
+    --l-bg-black: #111111;
+    --l-ink: #111111;
+    --l-ink-soft: #4A4A46;
+    --l-ink-mute: #8C897E;
+
+    --l-lime: #C8F000;
+    --l-pink: #FF4FA3;
+    --l-purple: #9B6DFF;
+    --l-orange: #FF6B35;
+    --l-beige: #E7DDC9;
+
+    --l-border: rgba(17, 17, 17, 0.14);
+    --l-border-soft: rgba(17, 17, 17, 0.08);
+    --l-border-on-black: rgba(245, 243, 236, 0.16);
+
+    --l-radius-sm: 4px;
+    --l-radius-md: 6px;
+    --l-radius-pill: 999px;
+
+    --l-display: 'Bebas Neue', 'Space Grotesk', sans-serif;
+    --l-body: 'DM Sans', 'Inter', sans-serif;
+
+    background: var(--l-bg);
+    color: var(--l-ink);
+    font-family: var(--l-body);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+/* ── Reset for this scope only ────────────────────────────────────────── */
+.landing-page,
+.landing-page *,
+.landing-page *::before,
+.landing-page *::after {
+    box-sizing: border-box;
+}
+
+.landing-page h1,
+.landing-page h2,
+.landing-page h3 {
+    margin: 0;
+    font-family: var(--l-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+}
+
+.landing-page p {
+    margin: 0;
+}
+
+.landing-page a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.landing-page button {
+    font-family: var(--l-body);
+    cursor: pointer;
+}
+
+.landing-page .l-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+/* ── Scroll-reveal utility (used by sections below the hero) ──────────── */
+.landing-page .l-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(.16, .84, .44, 1), transform 0.7s cubic-bezier(.16, .84, .44, 1);
+}
+
+.landing-page .l-reveal--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.landing-page .l-header-bar {
+    border-bottom: 1px solid var(--l-border-soft);
+}
+
+.landing-page .l-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 0;
+}
+
+.landing-page .l-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-family: var(--l-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+    position: relative;
+}
+
+.landing-page .l-logo .l-logo-os {
+    position: relative;
+    padding-right: 10px;
+}
+
+.landing-page .l-logo .l-logo-os::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: 0;
+    width: 7px;
+    height: 7px;
+    background: var(--l-lime);
+}
+
+.landing-page .l-nav {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    margin-right: auto;
+    margin-left: 40px;
+}
+
+.landing-page .l-nav a {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--l-ink);
+    transition: color 0.15s ease;
+}
+
+.landing-page .l-nav a:hover {
+    color: var(--l-ink-soft);
+}
+
+.landing-page .l-nav-mobile-hide {
+    display: flex;
+}
+
+.landing-page .l-header-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid var(--l-ink);
+    border-radius: var(--l-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.landing-page .l-header-cta:hover {
+    background: var(--l-ink);
+    color: var(--l-bg);
+}
+
+/* ── Hero shell ──────────────────────────────────────────────────────── */
+.landing-page .l-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    padding: 56px 0 72px;
+    position: relative;
+}
+
+.landing-page .l-hero-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* ── Eyebrow ─────────────────────────────────────────────────────────── */
+.landing-page .l-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 22px;
+}
+
+.landing-page .l-eyebrow .l-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--l-lime);
+    display: inline-block;
+}
+
+/* ── Headline ────────────────────────────────────────────────────────── */
+.landing-page .l-headline {
+    font-family: var(--l-display);
+    font-size: clamp(2.6rem, 5.4vw, 4.4rem);
+    line-height: 0.96;
+    letter-spacing: 0.005em;
+    margin-bottom: 24px;
+}
+
+.landing-page .l-headline .l-highlight {
+    position: relative;
+    display: inline-block;
+}
+
+.landing-page .l-headline .l-highlight::after {
+    content: '';
+    position: absolute;
+    left: -2%;
+    right: -2%;
+    bottom: 0.02em;
+    height: 0.22em;
+    background: var(--l-lime);
+    z-index: -1;
+    transform: rotate(-0.6deg) skewX(-4deg);
+}
+
+/* ── Body copy ───────────────────────────────────────────────────────── */
+.landing-page .l-hero-copy {
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: var(--l-ink-soft);
+    max-width: 460px;
+    margin-bottom: 32px;
+}
+
+/* ── Primary CTA ─────────────────────────────────────────────────────── */
+.landing-page .l-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 26px;
+    background: var(--l-lime);
+    color: var(--l-ink);
+    border: none;
+    border-radius: var(--l-radius-sm);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    margin-bottom: 40px;
+}
+
+.landing-page .l-cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 0 var(--l-ink);
+}
+
+.landing-page .l-cta-primary svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Signals row ─────────────────────────────────────────────────────── */
+.landing-page .l-signals {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+}
+
+.landing-page .l-signal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.landing-page .l-signal-icon {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--l-border);
+    border-radius: var(--l-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.landing-page .l-signal-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--l-ink);
+}
+
+.landing-page .l-signal-text {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.landing-page .l-signal-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--l-border);
+}
+
+/* ── Hero entrance sequence ──────────────────────────────────────────────
+   Staggers eyebrow → headline → copy → CTA → signals, in that DOM order.
+   Purely additive to existing layout — no structural change needed.
+──────────────────────────────────────────────────────────────────────── */
+@keyframes l-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landing-page .l-hero-left>* {
+    opacity: 0;
+    animation: l-fade-up 0.6s cubic-bezier(.16, .84, .44, 1) forwards;
+}
+
+.landing-page .l-hero-left>*:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.landing-page .l-hero-left>*:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.landing-page .l-hero-left>*:nth-child(3) {
+    animation-delay: 0.30s;
+}
+
+.landing-page .l-hero-left>*:nth-child(4) {
+    animation-delay: 0.42s;
+}
+
+.landing-page .l-hero-left>*:nth-child(5) {
+    animation-delay: 0.54s;
+}
+
+/* ── Hero right: dot-grid decoration ────────────────────────────────────
+   Markup note (for index.html):
+   <div class="l-hero-right">
+     <div class="l-dot-grid" aria-hidden="true"></div>
+     <div class="l-preview"> ... </div>
+   </div>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-hero-right {
+    position: relative;
+}
+
+.landing-page .l-dot-grid {
+    position: absolute;
+    top: -34px;
+    right: 6%;
+    width: 130px;
+    height: 90px;
+    background-image: radial-gradient(var(--l-ink-mute) 1.3px, transparent 1.3px);
+    background-size: 13px 13px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Live interview preview (product mock) ──────────────────────────────
+   Markup note:
+   <div class="l-preview">
+     <div class="l-preview-top">
+       <span class="l-preview-title">LIVE INTERVIEW PREVIEW</span>
+       <span class="l-preview-live-dot"></span>
+     </div>
+     <div class="l-preview-meta">
+       <span>QUESTION 03 / 08</span>
+       <span>TOPIC: <em>VECTOR DATABASES</em></span>
+     </div>
+     <h3 class="l-preview-question">How would you diagnose poor retrieval quality in production?</h3>
+     <span class="l-preview-label">CANDIDATE RESPONSE</span>
+     <div class="l-preview-response">I would start by checking embedding quality, then look at the index freshness and the retrieval query.</div>
+     <span class="l-preview-label">FOLLOW-UP</span>
+     <p class="l-preview-followup">Good start. How would you evaluate whether the issue is with the embeddings or the retrieval strategy?</p>
+     <div class="l-preview-progress">
+       <div class="l-preview-progress-head"><span>SESSION PROGRESS</span><span>37%</span></div>
+       <div class="l-preview-bar"><div class="l-preview-bar-fill" style="width:37%"></div></div>
+     </div>
+   </div>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-preview {
+    position: relative;
+    z-index: 1;
+    background: var(--l-bg-black);
+    color: #F2F1EC;
+    border-radius: var(--l-radius-md);
+    padding: 30px 32px 34px;
+    opacity: 0;
+    animation: l-preview-in 0.7s cubic-bezier(.16, .84, .44, 1) 0.32s forwards;
+}
+
+@keyframes l-preview-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.landing-page .l-preview-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.landing-page .l-preview-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #B9B6AC;
+}
+
+.landing-page .l-preview-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--l-lime);
+}
+
+.landing-page .l-preview-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #9C998F;
+    margin-bottom: 16px;
+}
+
+.landing-page .l-preview-meta em {
+    font-style: normal;
+    color: var(--l-lime);
+}
+
+.landing-page .l-preview-question {
+    font-family: var(--l-body);
+    text-transform: none;
+    font-weight: 700;
+    font-size: 1.18rem;
+    line-height: 1.4;
+    letter-spacing: 0;
+    margin-bottom: 22px;
+    color: #FFFFFF;
+}
+
+.landing-page .l-preview-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8B887E;
+    margin-bottom: 10px;
+}
+
+.landing-page .l-preview-response {
+    background: #1B1B1A;
+    border: 1px solid var(--l-border-on-black);
+    border-radius: var(--l-radius-sm);
+    padding: 16px 18px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #D8D6CE;
+    margin-bottom: 22px;
+}
+
+.landing-page .l-preview-followup {
+    font-size: 0.98rem;
+    line-height: 1.55;
+    font-weight: 600;
+    color: #F2F1EC;
+    padding-top: 4px;
+    margin-bottom: 26px;
+    border-top: 1px solid var(--l-border-on-black);
+    padding-top: 16px;
+}
+
+.landing-page .l-preview-progress-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #9C998F;
+    margin-bottom: 10px;
+}
+
+.landing-page .l-preview-bar {
+    width: 100%;
+    height: 5px;
+    background: #2B2A27;
+    border-radius: var(--l-radius-pill);
+    overflow: hidden;
+}
+
+.landing-page .l-preview-bar-fill {
+    height: 100%;
+    width: var(--fill, 37%);
+    background: var(--l-lime);
+    border-radius: var(--l-radius-pill);
+    animation: l-bar-grow 1s cubic-bezier(.16, .84, .44, 1) 0.95s both;
+}
+
+@keyframes l-bar-grow {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: var(--fill, 37%);
+    }
+}
+
+/* ── ABTalks marquee ─────────────────────────────────────────────────────
+   Sits between the hero and the metrics strip. Pure CSS scroll (no
+   animation dependency), duplicated content set for a seamless loop,
+   pauses on hover, and disables entirely under prefers-reduced-motion.
+
+   Markup note:
+   <div class="l-marquee">
+     <div class="l-marquee-track">
+       <span class="l-marquee-item">BUILT FOR THE ABTALKS HACKATHON</span>
+       <span class="l-marquee-dot">•</span>
+       <span class="l-marquee-item">INTERVIEWOS × ABTALKS</span>
+       <span class="l-marquee-dot">•</span>
+       <span class="l-marquee-item">BUILD. SHIP. IMPACT.</span>
+       <span class="l-marquee-dot">•</span>
+       <a class="l-marquee-item l-marquee-link" href="https://www.abtalks.in/hackathon/submission" target="_blank" rel="noopener noreferrer">EXPLORE THE HACKATHON →</a>
+       <span class="l-marquee-dot">•</span>
+       ... same set repeated once more, aria-hidden="true" ...
+     </div>
+   </div>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-marquee {
+    border-top: 1px solid var(--l-border-soft);
+    border-bottom: 1px solid var(--l-border-soft);
+    overflow: hidden;
+    padding: 13px 0;
+}
+
+.landing-page .l-marquee-track {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    width: max-content;
+    animation: l-marquee-scroll 30s linear infinite;
+}
+
+.landing-page .l-marquee:hover .l-marquee-track {
+    animation-play-state: paused;
+}
+
+.landing-page .l-marquee-item {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--l-ink);
+}
+
+.landing-page .l-marquee-link {
+    border-bottom: 1px solid var(--l-lime);
+    padding-bottom: 2px;
+    transition: color 0.15s ease;
+}
+
+.landing-page .l-marquee-link:hover {
+    color: var(--l-ink-soft);
+}
+
+.landing-page .l-marquee-dot {
+    color: var(--l-lime);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+@keyframes l-marquee-scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-page .l-marquee-track {
+        animation: none;
+    }
+
+    .landing-page .l-hero-left>*,
+    .landing-page .l-preview,
+    .landing-page .l-preview-bar-fill {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .landing-page .l-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+/* ── Metrics strip ───────────────────────────────────────────────────────
+   Markup note:
+   <section class="l-metrics">
+     <div class="l-container">
+       <div class="l-metrics-inner">
+         <div class="l-metric">
+           <span class="l-metric-icon l-metric-icon--pink">[svg]</span>
+           <div><strong class="l-metric-value">10,000+</strong><span class="l-metric-label">Learners</span></div>
+         </div>
+         <span class="l-metric-divider"></span>
+         ... (lime, then beige) ...
+       </div>
+     </div>
+   </section>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-metrics {
+    border-top: 1px solid var(--l-border-soft);
+    border-bottom: 1px solid var(--l-border-soft);
+}
+
+.landing-page .l-metrics-inner {
+    padding: 28px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 48px;
+}
+
+.landing-page .l-metric {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.landing-page .l-metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--l-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.landing-page .l-metric-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.landing-page .l-metric-icon--pink {
+    background: var(--l-pink);
+    color: #fff;
+}
+
+.landing-page .l-metric-icon--lime {
+    background: var(--l-lime);
+    color: var(--l-ink);
+}
+
+.landing-page .l-metric-icon--beige {
+    background: var(--l-beige);
+    color: var(--l-ink);
+}
+
+.landing-page .l-metric-value {
+    display: block;
+    font-family: var(--l-body);
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+
+.landing-page .l-metric-label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--l-ink-soft);
+}
+
+.landing-page .l-metric-divider {
+    width: 1px;
+    height: 34px;
+    background: var(--l-border);
+}
+
+/* ── Candidate dashboard (black section) ────────────────────────────────
+   Markup note:
+   <section class="l-dashboard" id="candidates">
+     <div class="l-dashboard-decor"> ...absolute colored blocks... </div>
+     <div class="l-container">
+       <div class="l-dashboard-head">
+         <div>
+           <span class="l-section-number">01</span>
+           <h2 class="l-section-title">Candidate Dashboard</h2>
+           <p class="l-dashboard-desc">Select a cohort learner to begin an adaptive interview.</p>
+         </div>
+         <div class="l-search"><svg>...</svg><input placeholder="Search candidates..."><kbd>/</kbd></div>
+       </div>
+       <div class="l-table-wrap">
+         <table class="l-table"> ... </table>
+       </div>
+       <div class="l-view-all"><a href="#">VIEW ALL CANDIDATES →</a></div>
+     </div>
+   </section>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-dashboard {
+    position: relative;
+    background: var(--l-bg-black);
+    color: #F2F1EC;
+    padding: 64px 0 56px;
+    overflow: hidden;
+}
+
+.landing-page .l-dashboard-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.landing-page .l-decor-block {
+    position: absolute;
+    border-radius: 22px;
+}
+
+.landing-page .l-dashboard-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.landing-page .l-section-number {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--l-lime);
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+}
+
+.landing-page .l-section-title {
+    font-family: var(--l-display);
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    color: #FFFFFF;
+    margin-bottom: 8px;
+}
+
+.landing-page .l-dashboard-desc {
+    font-size: 0.92rem;
+    color: #A9A69C;
+}
+
+.landing-page .l-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--l-border-on-black);
+    border-radius: var(--l-radius-sm);
+    padding: 10px 14px;
+    min-width: 240px;
+}
+
+.landing-page .l-search svg {
+    width: 15px;
+    height: 15px;
+    stroke: #9C998F;
+    flex-shrink: 0;
+}
+
+.landing-page .l-search input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #F2F1EC;
+    font-family: var(--l-body);
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.landing-page .l-search input::placeholder {
+    color: #746F63;
+}
+
+.landing-page .l-search kbd {
+    font-size: 0.72rem;
+    color: #746F63;
+    border: 1px solid var(--l-border-on-black);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: var(--l-body);
+}
+
+/* Table */
+.landing-page .l-table-wrap {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+}
+
+.landing-page .l-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.landing-page .l-table thead th {
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: #746F63;
+    padding: 0 12px 14px;
+    border-bottom: 1px solid var(--l-border-on-black);
+}
+
+.landing-page .l-table tbody td {
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--l-border-on-black);
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+.landing-page .l-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.landing-page .l-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.landing-page .l-candidate-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.landing-page .l-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #111;
+    flex-shrink: 0;
+}
+
+.landing-page .l-candidate-name {
+    font-weight: 600;
+    color: #F2F1EC;
+}
+
+.landing-page .l-candidate-role {
+    display: block;
+    font-size: 0.76rem;
+    color: #837F73;
+    margin-top: 1px;
+}
+
+.landing-page .l-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    border-radius: var(--l-radius-sm);
+}
+
+.landing-page .l-badge--advanced {
+    color: var(--l-lime);
+}
+
+.landing-page .l-badge--intermediate {
+    color: var(--l-purple);
+}
+
+.landing-page .l-badge--foundational {
+    color: var(--l-pink);
+}
+
+.landing-page .l-progress-cell {
+    min-width: 110px;
+}
+
+.landing-page .l-progress-frac {
+    display: block;
+    font-size: 0.78rem;
+    color: #C9C6BC;
+    margin-bottom: 6px;
+}
+
+.landing-page .l-progress-track {
+    width: 100%;
+    height: 4px;
+    background: #2B2A27;
+    border-radius: var(--l-radius-pill);
+    overflow: hidden;
+}
+
+.landing-page .l-progress-fill {
+    height: 100%;
+    background: var(--l-lime);
+    border-radius: var(--l-radius-pill);
+}
+
+.landing-page .l-focus-area {
+    color: #C9C6BC;
+}
+
+.landing-page .l-row-action {
+    color: var(--l-lime);
+    font-weight: 700;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.landing-page .l-view-all {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-top: 26px;
+}
+
+.landing-page .l-view-all a {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--l-lime);
+}
+
+/* ── How InterviewOS Works ──────────────────────────────────────────────
+   Markup note:
+   <section class="l-how" id="how-it-works">
+     <div class="l-how-decor" aria-hidden="true">[svg]</div>
+     <div class="l-container">
+       <span class="l-section-number">02</span>
+       <h2 class="l-section-title l-section-title--dark">How InterviewOS Works</h2>
+       <div class="l-steps">
+         <div class="l-step">
+           <span class="l-step-num">01</span>
+           <span class="l-step-icon">[svg]</span>
+           <h3 class="l-step-title">Understand the learner</h3>
+           <p class="l-step-desc">We analyze 31-day progress, missions, and learning signals.</p>
+         </div>
+         <span class="l-step-arrow">[svg]</span>
+         ... (02, 03) ...
+       </div>
+     </div>
+   </section>
+──────────────────────────────────────────────────────────────────────── */
+.landing-page .l-how {
+    position: relative;
+    padding: 76px 0 88px;
+    overflow: hidden;
+}
+
+.landing-page .l-how .l-section-number {
+    color: var(--l-ink);
+    opacity: 0.55;
+}
+
+.landing-page .l-section-title--dark {
+    color: var(--l-ink);
+    margin-bottom: 44px;
+}
+
+.landing-page .l-how-decor {
+    position: absolute;
+    top: 10px;
+    right: 4%;
+    width: 220px;
+    height: 220px;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.landing-page .l-how-decor svg {
+    width: 100%;
+    height: 100%;
+}
+
+.landing-page .l-steps {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.landing-page .l-step {
+    flex: 1;
+    min-width: 0;
+}
+
+.landing-page .l-step-num {
+    display: inline-block;
+    background: var(--l-lime);
+    color: var(--l-ink);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--l-radius-sm);
+    margin-bottom: 16px;
+}
+
+.landing-page .l-step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background: var(--l-bg-black);
+    border-radius: var(--l-radius-sm);
+    margin-bottom: 18px;
+}
+
+.landing-page .l-step-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: #F2F1EC;
+}
+
+.landing-page .l-step-title {
+    font-family: var(--l-body);
+    text-transform: none;
+    font-weight: 700;
+    font-size: 1.08rem;
+    letter-spacing: 0;
+    margin-bottom: 10px;
+}
+
+.landing-page .l-step-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--l-ink-soft);
+    max-width: 260px;
+}
+
+.landing-page .l-step-arrow {
+    display: flex;
+    align-items: center;
+    padding-top: 26px;
+    flex-shrink: 0;
+    color: var(--l-ink-mute);
+}
+
+.landing-page .l-step-arrow svg {
+    width: 26px;
+    height: 14px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.landing-page .l-footer {
+    border-top: 1px solid var(--l-border-soft);
+    padding: 52px 0 28px;
+}
+
+.landing-page .l-footer-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    padding-bottom: 44px;
+    flex-wrap: wrap;
+}
+
+.landing-page .l-footer-brand {
+    max-width: 240px;
+}
+
+.landing-page .l-footer-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--l-bg-black);
+    color: #F2F1EC;
+    font-family: var(--l-display);
+    font-size: 1.1rem;
+    border-radius: var(--l-radius-sm);
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.landing-page .l-footer-mark::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: var(--l-lime);
+}
+
+.landing-page .l-footer-tagline {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--l-ink-soft);
+}
+
+.landing-page .l-footer-cols {
+    display: flex;
+    gap: 64px;
+    flex-wrap: wrap;
+}
+
+.landing-page .l-footer-col h4 {
+    font-family: var(--l-body);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--l-ink-mute);
+    margin-bottom: 16px;
+}
+
+.landing-page .l-footer-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.landing-page .l-footer-col a {
+    font-size: 0.88rem;
+    color: var(--l-ink-soft);
+    transition: color 0.15s ease;
+}
+
+.landing-page .l-footer-col a:hover {
+    color: var(--l-ink);
+}
+
+.landing-page .l-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid var(--l-border-soft);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.landing-page .l-footer-copy {
+    font-size: 0.8rem;
+    color: var(--l-ink-mute);
+}
+
+.landing-page .l-footer-social {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.landing-page .l-footer-social a {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--l-ink-soft);
+}
+
+.landing-page .l-footer-social a:hover {
+    color: var(--l-ink);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .landing-page .l-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-page .l-nav-mobile-hide {
+        display: none;
+    }
+
+    .landing-page .l-dot-grid {
+        display: none;
+    }
+
+    .landing-page .l-metrics-inner {
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .landing-page .l-steps {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .landing-page .l-step-arrow {
+        display: none;
+    }
+
+    .landing-page .l-how-decor {
+        display: none;
+    }
+
+    .landing-page .l-step-desc {
+        max-width: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .landing-page .l-container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .landing-page .l-header {
+        padding: 18px 0;
+    }
+
+    .landing-page .l-hero {
+        padding: 40px 0 56px;
+        gap: 32px;
+    }
+
+    .landing-page .l-signals {
+        gap: 14px;
+    }
+
+    .landing-page .l-preview {
+        padding: 24px 20px 28px;
+    }
+
+    .landing-page .l-dashboard-head {
+        align-items: flex-start;
+    }
+
+    .landing-page .l-search {
+        width: 100%;
+    }
+
+    .landing-page .l-footer-cols {
+        gap: 32px;
+    }
+
+    .landing-page .l-marquee-track {
+        animation-duration: 20s;
+    }
+    .landing-page .l-header-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(245, 243, 236, 0.92);
+    backdrop-filter: blur(16px);
+}
+
+.landing-page .l-hero {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    text-align: center;
+    padding: 54px 0 72px;
+}
+
+.landing-page .l-hero-left {
+    align-items: center;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.landing-page .l-headline {
+    font-size: clamp(3.4rem, 8vw, 7.4rem);
+    line-height: 0.9;
+    max-width: 920px;
+}
+
+.landing-page .l-hero-copy {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.landing-page .l-signals {
+    justify-content: center;
+}
+
+.landing-page .l-hero-right {
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.landing-page .l-preview {
+    text-align: left;
+    box-shadow: 0 28px 70px rgba(17, 17, 17, 0.22);
+}
+
+.landing-page .l-dot-grid {
+    top: -28px;
+    right: -26px;
+}
+
+.landing-page .l-dashboard-snapshot {
+    margin: 18px auto 0;
+    background: #ffffff;
+    border: 1px solid var(--l-border-soft);
+    border-radius: var(--l-radius-md);
+    padding: 14px;
+    box-shadow: 0 18px 45px rgba(17, 17, 17, 0.12);
+    text-align: left;
+}
+
+.landing-page .l-snapshot-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--l-ink-mute);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.landing-page .l-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.landing-page .l-snapshot-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--l-border-soft);
+    border-radius: var(--l-radius-sm);
+    background: #F8FAFC;
+}
+
+.landing-page .l-snapshot-card.active {
+    border-color: var(--l-ink);
+    background: var(--l-lime);
+}
+
+.landing-page .l-snapshot-avatar {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--l-lime);
+    color: var(--l-ink);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.landing-page .l-snapshot-avatar.pink {
+    background: var(--l-pink);
+    color: #fff;
+}
+
+.landing-page .l-snapshot-avatar.purple {
+    background: var(--l-purple);
+    color: #fff;
+}
+
+.landing-page .l-snapshot-card strong {
+    display: block;
+    font-size: 0.84rem;
+}
+
+.landing-page .l-snapshot-card small {
+    display: block;
+    color: var(--l-ink-soft);
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+
+.landing-page .l-snapshot-card em {
+    font-style: normal;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.landing-page .l-how {
+    text-align: center;
+}
+
+.landing-page .l-section-title--dark {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.landing-page .l-steps {
+    justify-content: center;
+}
+
+.landing-page .l-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.landing-page .l-step-desc {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 760px) {
+    .landing-page .l-snapshot-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-page .l-headline {
+        font-size: clamp(3rem, 18vw, 5.2rem);
+    }
+
+    .landing-page .l-preview-meta {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+}

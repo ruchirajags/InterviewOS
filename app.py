@@ -1,4 +1,4 @@
-﻿import os
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -49,5 +49,6 @@ if __name__ == "__main__":
         app,
         host=Config.HOST,
         port=Config.PORT,
-        debug=Config.DEBUG
+        debug=Config.DEBUG,
+        allow_unsafe_werkzeug=True
     )

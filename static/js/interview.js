@@ -8,6 +8,7 @@ let roleValue = "AI Cohort Graduate";
 let candidateId = "";
 let sessionId = "";
 let candidatePayload = null;
+let mediaMode = false;
 
 const MAX_QUESTIONS = 10;
 const DURATION_SECONDS = 1200;
@@ -96,6 +97,22 @@ function handleInterviewResponse(data) {
         setQuestionStatus("error");
         return;
     }
+
+    if (data.needs_retry) {
+    currentQuestion = sanitizeAiText(data.reply);
+    document.getElementById("question").textContent = currentQuestion;
+    updateProgress(data.state);
+    updateJourney(data.state);
+    setQuestionStatus("waiting");
+
+    const input = document.getElementById("typedAnswer");
+    if (input) input.focus();
+
+    showStatus(`Please retry: ${data.quality?.reason || "answer was unclear"}.`, "warning");
+    return;
+    }
+
+    
     if (data.done) {
         interviewActive = false;
         clearInterval(interviewTimer);
@@ -182,6 +199,47 @@ function updateJourney(state) {
         const cls = topic.day === currentDay ? "journey-item active" : covered.has(topic.day) ? "journey-item done" : "journey-item";
         return `<div class="${cls}"><span>Day ${topic.day}</span><strong>${topic.title}</strong></div>`;
     }).join("");
+}
+function setMediaMode(enabled) {
+    mediaMode = Boolean(enabled);
+
+    const recordBtn = document.getElementById("recordBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const textOnlyBtn = document.getElementById("textOnlyBtn");
+
+    if (recordBtn) recordBtn.style.display = mediaMode ? "inline-flex" : "none";
+    if (stopBtn) stopBtn.style.display = mediaMode ? "inline-flex" : "none";
+    if (textOnlyBtn) textOnlyBtn.textContent = mediaMode ? "Text Only" : "Text Mode Active";
+}
+
+function switchToTextOnly(showMessage = true) {
+    if (typeof stopRecording === "function" && typeof isRecording !== "undefined" && isRecording) {
+        try { stopRecording(); } catch (e) { console.warn("Could not stop recording", e); }
+    }
+
+    if (typeof stopMedia === "function") stopMedia();
+
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+
+    if (localVideo) localVideo.srcObject = null;
+    if (remoteVideo) remoteVideo.srcObject = null;
+
+    setMediaMode(false);
+
+    const submitBtn = document.getElementById("submitAnswerBtn");
+    if (submitBtn) submitBtn.disabled = !interviewActive;
+
+    if (showMessage) {
+        showStatus("Text-only mode enabled. You can continue the same interview by typing answers.", "success");
+    }
+}
+
+function enableMediaMode() {
+    setMediaMode(true);
+
+    const recordBtn = document.getElementById("recordBtn");
+    if (recordBtn) recordBtn.disabled = !interviewActive;
 }
 
 function setQuestionStatus(state) {

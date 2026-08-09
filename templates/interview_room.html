@@ -49,6 +49,7 @@
             <div class="control-bar">
                 <button class="btn btn-ghost btn-sm" id="muteBtn" onclick="toggleMute()">Mute</button>
                 <button class="btn btn-ghost btn-sm" id="videoBtn" onclick="toggleVideo()">Stop Video</button>
+                <button class="btn btn-ghost btn-sm" id="textOnlyBtn" onclick="switchToTextOnly()">Text Only</button>
                 <button class="btn btn-primary" id="startBtn" onclick="startInterview()">Start Interview</button>
                 <button class="btn btn-danger btn-sm" onclick="confirmEnd()">End Session</button>
             </div>
@@ -108,8 +109,10 @@
 <script src="/static/js/audio.js"></script>
 <script src="/static/js/interview.js"></script>
 <script>
-function skipPermissions(){ document.getElementById("permissionModal").style.display = "none"; }
-async function requestPermissions(){
+function skipPermissions(){
+    document.getElementById("permissionModal").style.display = "none";
+    if (typeof switchToTextOnly === "function") switchToTextOnly(false);
+}async function requestPermissions(){
     const ok = await startMedia();
     if (ok) { document.getElementById("permissionModal").style.display = "none"; joinRoom(roomId); showStatus("Media enabled. You can start the interview.", "success"); }
     else { document.getElementById("modalError").textContent = "Permission denied. You can continue in text mode."; document.getElementById("modalError").style.display = "block"; }

@@ -1,4 +1,5 @@
-﻿from dataclasses import dataclass, field
+﻿import re
+from dataclasses import dataclass, field
 from typing import Any
 
 from services.candidate_analyzer import IMPORTANT_DAYS, analyze_candidate
@@ -70,6 +71,16 @@ class InterviewEngine:
         if state.done:
             return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state)}
 
+        quality = self._validate_answer_quality(message)
+        if not quality["valid"]:
+            return {
+                "reply": quality["retry_prompt"],
+                "done": False,
+                "state": self.public_state(state),
+                "needs_retry": True,
+                "quality": quality,
+            }
+
         self._record_answer(state, message)
         if state.question_count >= 10:
             state.done = True
@@ -120,6 +131,30 @@ class InterviewEngine:
             "module": module_for_day(day),
             "objectives": item.get("objectives", [])[:3],
             "tools": item.get("tools", [])[:4],
+        }
+
+    def _validate_answer_quality(self, answer):
+        text = (answer or "").strip()
+        words = re.findall(r"[A-Za-z][A-Za-z0-9+#.-]*", text.lower())
+        unique_words = set(words)
+
+        if not text:
+            reason = "empty answer"
+        elif len(words) < 5:
+            reason = "too short to evaluate"
+        elif len(unique_words) <= 2 and len(words) >= 5:
+            reason = "mostly repeated words"
+        elif re.search(r"(.)\1{5,}", text.lower()):
+            reason = "repeated characters"
+        elif len(re.sub(r"[^a-zA-Z]", "", text)) < max(8, len(text) * 0.35):
+            reason = "not enough recognizable language"
+        else:
+            return {"valid": True, "reason": "answer is evaluable"}
+
+        return {
+            "valid": False,
+            "reason": reason,
+            "retry_prompt": "I could not evaluate that answer clearly. Please answer the same question in one or two technical sentences, using concrete concepts or tradeoffs from the system.",
         }
 
     def _ask_question(self, state, opening=False, followup=None):

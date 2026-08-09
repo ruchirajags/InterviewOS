@@ -143,6 +143,8 @@
                             <span id="infoExp">—</span>
                             <span class="dot"></span>
                             <span id="infoLevelText">—</span>
+                            <span class="dot"></span>
+                            <span id="infoCandidateId">—</span>
                         </div>
                         <div class="db-meta-blocks">
                             <div class="db-meta-block">
@@ -438,7 +440,7 @@
                     <span class="db-candidate-avatar" style="background:${palette.bg};color:${palette.text};" aria-hidden="true">${initials(member.name)}</span>
                     <div class="db-candidate-info">
                         <span class="db-candidate-name">${member.name || "Candidate"}</span>
-                        <span class="db-candidate-role">${member.jobRole || "AI Cohort Graduate"}</span>
+                        <span class="db-candidate-role">${member.jobRole || "AI Cohort Graduate"} · ${member.id || "CAND-UNKNOWN"}</span>
                     </div>
                     <span class="db-candidate-progress">${completed} / 31</span>
                 </div>`;
@@ -489,6 +491,10 @@
             document.getElementById("infoName").textContent = (member.name || "Candidate").toUpperCase();
             document.getElementById("infoRole").textContent = member.jobRole || "AI Cohort Graduate";
             document.getElementById("infoExp").textContent = `${member.yearsExperience || 0} Years`;
+            const candidateIdLabel = document.getElementById("infoCandidateId");
+            if (candidateIdLabel) {
+                candidateIdLabel.textContent = member.id || "CAND-UNKNOWN";
+            }
             document.getElementById("infoLevelText").textContent = levelLabel(difficulty);
             document.getElementById("infoFocus").textContent = focusAreaFor(summary);
             document.getElementById("infoProgress").textContent = `${String(completed).padStart(2, "0")} / 31`;
@@ -692,7 +698,8 @@
                 const name = document.getElementById("metaName")?.value || "Candidate";
                 const cb = document.getElementById("metaCandidateBadge");
                 const tm = document.getElementById("timer");
-                if (cb) cb.textContent = `Candidate: ${name}`;
+                const candId = document.getElementById("metaCandidateId")?.value || "";
+                if (cb) cb.textContent = candId ? `Candidate: ${name} · ${candId}` : `Candidate: ${name}`;
                 if (tm) tm.style.display = "";
             }
         };
@@ -775,7 +782,8 @@
             const mr = document.getElementById("metaRow"); if (mr) mr.style.display = "flex";
             const tm = document.getElementById("timer"); if (tm) tm.style.display = "";
             const name = document.getElementById("metaName")?.value || "Candidate";
-            const cb = document.getElementById("metaCandidateBadge"); if (cb) cb.textContent = `Candidate: ${name}`;
+            const cb = document.getElementById("metaCandidateBadge"); const candId = document.getElementById("metaCandidateId")?.value || ""; 
+            if (cb) cb.textContent = candId ? `Candidate: ${name} · ${candId}` : `Candidate: ${name}`;
             const rb = document.getElementById("metaRoomBadge"); if (rb) rb.textContent = "Session active";
 
             const sub = document.getElementById("submitAnswerBtn"); if (sub) sub.disabled = false;

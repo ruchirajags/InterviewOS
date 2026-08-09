@@ -37,6 +37,32 @@ KEYWORDS = {
     31: ["tradeoff", "architecture", "evaluation", "deployment", "improve", "system"],
 }
 
+EXPECTED_DIRECTIONS = {
+    7: "A strong answer should explain embeddings as vector representations that capture semantic meaning and support similarity search.",
+    8: "A strong answer should mention indexes, metadata filters, similarity metrics, latency, and relevance tuning.",
+    10: "A strong answer should separate retrieval failure from generation failure using chunking, recall, reranking, and evaluation traces.",
+    12: "A strong answer should mention schema constraints, examples, validation, hallucination control, and deterministic output format.",
+    13: "A strong answer should explain when structured outputs or tool calls are safer than free text and how validation prevents failures.",
+    16: "A strong answer should cover validation, timeouts, retries, rate limits, async behavior, and graceful error responses.",
+    22: "A strong answer should justify agents only when roles, tools, memory, or handoffs create value beyond a single workflow.",
+    23: "A strong answer should explain MCP clients, servers, tool schemas, resources, permissions, and safe tool execution.",
+    27: "A strong answer should include prompt injection, PII, access control, policy guardrails, logging, and privacy risks.",
+    28: "A strong answer should cover containers, health checks, scaling, latency, rollback, and deployment reliability.",
+    29: "A strong answer should mention traces, latency, cost, evals, regression monitoring, and production observability.",
+    30: "A strong answer should include fallbacks, caching, queues, rollback plans, model-provider failure handling, and safety.",
+    31: "A strong answer should describe architecture, tradeoffs, evaluation, deployment, limitations, and future improvements.",
+}
+
+WEAK_WORDS = [
+    "maybe", "somehow", "stuff", "things", "basically", "kind of",
+    "sort of", "i guess", "probably"
+]
+
+DEPTH_SIGNALS = [
+    "because", "tradeoff", "tradeoffs", "metric", "latency", "failure",
+    "debug", "monitor", "evaluate", "validate", "production", "fallback",
+    "risk", "scaling", "trace", "logs", "quality", "reliability"
+]
 
 @dataclass
 class InterviewState:
@@ -264,18 +290,66 @@ class InterviewEngine:
 
     def _evaluate(self, day, answer):
         text = (answer or "").lower()
-        hits = [kw for kw in KEYWORDS.get(day, []) if kw in text]
-        length_bonus = 1 if len(text.split()) >= 35 else 0
-        score = min(5, max(1, len(hits) // 2 + length_bonus + 1))
-        understanding = "excellent" if score == 5 else "strong" if score >= 4 else "partial" if score >= 2 else "weak"
-        missing = [kw for kw in KEYWORDS.get(day, []) if kw not in text][:3]
+        words = re.findall(r"[A-Za-z][A-Za-z0-9+#.-]*", text)
+
+        keyword_hits = [kw for kw in KEYWORDS.get(day, []) if kw in text]
+        missing = [kw for kw in KEYWORDS.get(day, []) if kw not in text][:4]
+        weak_signals = [word for word in WEAK_WORDS if word in text]
+        depth_hits = [signal for signal in DEPTH_SIGNALS if signal in text]
+
+        uncertainty = any(
+            phrase in text
+            for phrase in ["i don't know", "i dont know", "i am not sure", "i'm not sure", "no idea"]
+        )
+
+        score = 1
+
+        if len(words) >= 8:
+            score += 1
+        if len(words) >= 22:
+            score += 1
+        if len(keyword_hits) >= 1:
+            score += 1
+        if len(keyword_hits) >= 3:
+            score += 1
+        if len(depth_hits) >= 1:
+            score += 1
+        if len(depth_hits) >= 3:
+            score += 1
+
+        if uncertainty:
+            score = min(score, 2)
+        if len(weak_signals) >= 3:
+            score -= 1
+
+        score = min(5, max(1, score))
+
+        understanding = (
+            "excellent" if score == 5 else
+            "strong" if score >= 4 else
+            "developing" if score >= 3 else
+            "partial" if score >= 2 else
+            "weak"
+        )
 
         return {
             "day": day,
             "score": score,
             "understanding": understanding,
-            "strengths": hits[:3],
+            "strengths": keyword_hits[:4],
             "missing_concepts": missing,
+            "weak_signals": weak_signals[:4],
+            "depth_signals": depth_hits[:4],
+            "expected_direction": EXPECTED_DIRECTIONS.get(
+                day,
+                "A strong answer should explain the concept, implementation tradeoffs, and production evaluation signals."
+            ),
+            "answer_quality": (
+                "uncertain" if uncertainty else
+                "vague" if weak_signals and score <= 3 else
+                "specific" if score >= 4 else
+                "needs_more_depth"
+            ),
         }
 
     def _should_complete(self, state: InterviewState) -> bool:

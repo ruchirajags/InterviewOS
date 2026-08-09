@@ -122,20 +122,45 @@ async function submitTypedAnswer() {
 
 async function sendAnswer(answerText) {
     if (!interviewActive) return;
-    if (questionHistory.length > 0) questionHistory[questionHistory.length - 1].answer = answerText;
+
+    if (questionHistory.length > 0) {
+        questionHistory[questionHistory.length - 1].answer = answerText;
+    }
+
     const answerDisplay = document.getElementById("answerDisplay");
-    answerDisplay.textContent = `Your answer: "${answerText}"`;
-    answerDisplay.style.display = "block";
+    if (answerDisplay) {
+        answerDisplay.textContent = `Your answer: "${answerText}"`;
+        answerDisplay.style.display = "block";
+    }
+
     showStatus("Evaluating answer and deciding the next question...", "info");
     setQuestionStatus("thinking");
 
-    const response = await fetch("/api/interview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, message: answerText })
-    });
-    const data = await response.json();
-    handleInterviewResponse(data);
+    try {
+        const response = await fetch("/api/interview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, message: answerText })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Could not evaluate answer");
+        }
+
+        handleInterviewResponse(data);
+    } catch (err) {
+        console.error("Answer submission failed:", err);
+        showStatus("Could not evaluate answer: " + err.message, "error");
+        setQuestionStatus("error");
+
+        const input = document.getElementById("typedAnswer");
+        if (input) {
+            input.value = answerText;
+            input.focus();
+        }
+    }
 }
 
 function handleInterviewResponse(data) {

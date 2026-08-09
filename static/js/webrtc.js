@@ -28,6 +28,7 @@ async function startMedia() {
         });
         document.getElementById("localVideo").srcObject = localStream;
         console.log("[WebRTC] Media started");
+        if (typeof enableMediaMode === "function") enableMediaMode();
 
         // Clear error if now successful
         const el = document.getElementById("statusMsg");
@@ -77,6 +78,17 @@ function stopMedia() {
         localStream.getTracks().forEach(t => t.stop());
         localStream = null;
     }
+
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+
+    if (localVideo) localVideo.srcObject = null;
+    if (remoteVideo) remoteVideo.srcObject = null;
 }
 
 function toggleMute() {

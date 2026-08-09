@@ -152,4 +152,56 @@ How should the project be verified against the minimum requirements?
 - Python syntax compilation.
 - Flask test-client smoke test for `/api/interview`.
 - Candidate API smoke test for `/api/candidates`.
+---
+## 9. Answer Validation and Retry Handling
+
+**Status:** Implemented  
+**Files updated:**  
+- `services/interview_engine.py`
+- `static/js/interview.js`
+
+**Prompt / AI Assistance Used:**  
+Help improve the interview engine so that unclear gibberish answers are rejected without advancing the interview, while honest uncertainty such as "I am not sure" is treated as a weak but valid answer.
+
+**Implemented Logic:**  
+- Empty or random responses are rejected.
+- Repeated meaningless text is rejected.
+- Very short non-technical answers are rejected.
+- Uncertainty phrases are accepted as weak answers.
+- Weak answers are evaluated and included in the final report.
+- Invalid answers do not increase the question count.
+- The same question is repeated after an invalid response.
+
+**Reasoning:**  
+A real interviewer should distinguish between a candidate who is unsure and a candidate who has not provided a usable answer. This makes the interview more realistic and prevents unfair scoring.
+
+**Verification:**  
+Tested with:
+- Gibberish input
+- Repeated words
+- Short unclear answers
+- "I am not sure"
+- Short technical answers
+- Normal technical answers
+
+
+## 10. Interview Start and Retry Flow
+
+**Status:** Implemented  
+**Files updated:**  
+- `services/interview_engine.py`
+- `static/js/interview.js`
+
+**Prompt / AI Assistance Used:**  
+Fix the interview flow so the first question appears correctly and retry messages are clear for the candidate.
+
+**Implemented Logic:**  
+- The interview starts by creating a personalized session state.
+- The first question is returned from the generated interview plan.
+- Retry messages are displayed clearly.
+- The current question is repeated below the retry message.
+- Invalid responses no longer break the interview flow.
+
+**Reasoning:**  
+The candidate should never lose track of the question after an invalid answer. Repeating the question makes the experience smoother and closer to a real interview.
 

@@ -1,4 +1,5 @@
-﻿from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field
 from typing import Any
 
 from services.candidate_analyzer import IMPORTANT_DAYS, analyze_candidate
@@ -36,6 +37,7 @@ KEYWORDS = {
     31: ["tradeoff", "architecture", "evaluation", "deployment", "improve", "system"],
 }
 
+
 @dataclass
 class InterviewState:
     session_id: str
@@ -49,6 +51,7 @@ class InterviewState:
     evaluations: list[dict[str, Any]] = field(default_factory=list)
     last_question: dict[str, Any] | None = None
     done: bool = False
+
 
 class InterviewEngine:
     def __init__(self):
@@ -64,27 +67,56 @@ class InterviewEngine:
         return {"reply": reply, "done": False, "state": self.public_state(state)}
 
     def turn(self, session_id, message):
-        state = self.sessions.get(session_id)
-        if not state:
-            return {"error": "Unknown sessionId. Start the interview with a candidate object."}, 404
-        if state.done:
-            return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state)}
+            state = self.sessions.get(session_id)
+            if not state:
+                return {"error": "Unknown sessionId. Start the interview with a candidate object."}, 404
+            if state.done:
+                return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state)}
 
-        self._record_answer(state, message)
-        if state.question_count >= 10:
-            state.done = True
-            return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state), "transcript": state.transcript}
+            quality = self._validate_answer_quality(message)
+            if not quality["valid"]:
+                current_question = state.last_question.get("question", "Please answer the previous question.")
+                return {
+                    "reply": (
+                        "I couldn't understand that response clearly. "
+                        "Please retry with a complete, grammatical answer.\n\n"
+                        f"Question: {current_question}"
+                    ),
+                    "done": False,
+                    "state": self.public_state(state),
+                    "needs_retry": True,
+                    "quality": quality,
+            }
 
-        evaluation = state.evaluations[-1]
-        should_follow = state.topic_depth < 2 and (evaluation["score"] <= 2 or state.question_count in {3, 7})
-        if should_follow:
-            reply = self._ask_question(state, followup=self._followup(evaluation))
-        else:
-            state.topic_depth = 0
-            state.current_topic_index = min(state.current_topic_index + 1, len(state.plan) - 1)
-            reply = self._ask_question(state)
+            self._record_answer(state, message)
 
-        return {"reply": reply, "done": False, "state": self.public_state(state)}
+            if self._should_complete(state):
+                state.done = True
+                return {
+                    "reply": "Interview completed.",
+                    "done": True,
+                    "feedback": self._feedback(state),
+                    "transcript": state.transcript,
+                }
+
+            evaluation = state.evaluations[-1]
+            remaining_questions = max(0, 10 - state.question_count)
+            remaining_topics = max(0, len(state.plan) - state.current_topic_index - 1)
+
+            should_follow = (
+                state.topic_depth < 2
+                and remaining_questions > remaining_topics + 1
+                and (evaluation["score"] <= 2 or evaluation["score"] >= 4)
+            )
+
+            if should_follow:
+                reply = self._ask_question(state, followup=self._followup(evaluation))
+            else:
+                state.topic_depth = 0
+                state.current_topic_index = min(state.current_topic_index + 1, len(state.plan) - 1)
+                reply = self._ask_question(state)
+
+            return {"reply": reply, "done": False, "state": self.public_state(state)}
 
     def public_state(self, state):
         candidate = state.candidate.get("member", {})
@@ -100,17 +132,34 @@ class InterviewEngine:
     def _build_plan(self, analysis):
         completed = set(analysis["completed_days"])
         skipped = set(analysis["skipped_days"])
-        probe = [day for day in analysis["probe_days"] if day in completed]
-        strong = [day for day in analysis["strong_days"] if day in completed]
+        probe = set(analysis["probe_days"])
+
+        preferred_ai_order = [7, 8, 10, 12, 13, 16, 22, 23, 27, 28, 29, 30, 31]
+
         plan = []
-        for day in probe + IMPORTANT_DAYS + strong:
+
+        # 1. Add completed AI-core days in natural interview order.
+        for day in preferred_ai_order:
+            if day in completed and day not in skipped and day in self.day_map:
+                plan.append(day)
+
+        # 2. Add candidate-specific probe days not already included.
+        for day in sorted(probe):
             if day in completed and day not in skipped and day in self.day_map and day not in plan:
                 plan.append(day)
+
+        # 3. Add any other completed candidate days.
+        for day in sorted(completed):
+            if day not in skipped and day in self.day_map and day not in plan:
+                plan.append(day)
+
+        # 4. If sparse candidate, add awareness-level important topics.
         if len(plan) < 8:
-            for day in IMPORTANT_DAYS:
+            for day in preferred_ai_order:
                 if day not in skipped and day in self.day_map and day not in plan:
                     plan.append(day)
-        return plan[:8] or [7, 8, 10, 12, 16, 22, 23, 29]
+
+        return plan[:9] or [7, 8, 10, 12, 16, 22, 23, 29]
 
     def _topic(self, day):
         item = self.day_map.get(day, {})
@@ -129,12 +178,17 @@ class InterviewEngine:
         state.topic_depth += 1
         name = state.candidate.get("member", {}).get("name", "there")
         difficulty = state.analysis.get("difficulty", "intermediate")
+
         if followup:
             text = followup
         else:
             prefix = f"Welcome {name}. " if opening else ""
             level = "Let's move beyond definitions. " if difficulty == "advanced" else ""
-            text = prefix + level + QUESTION_BANK.get(day, f"Explain the key engineering decisions behind {topic['title']}.")
+            text = prefix + level + QUESTION_BANK.get(
+                day,
+                f"Explain the key engineering decisions behind {topic['title']}.",
+            )
+
         state.last_question = {
             "number": state.question_count,
             "day": day,
@@ -145,6 +199,63 @@ class InterviewEngine:
         }
         state.transcript.append({**state.last_question, "answer": ""})
         return text
+
+    def _validate_answer_quality(self, answer):
+        text = (answer or "").strip()
+        lowered = text.lower()
+
+        uncertainty_phrases = [
+            "i don't know",
+            "i dont know",
+            "i am not sure",
+            "i'm not sure",
+            "not sure",
+            "i have no idea",
+            "no idea",
+            "i am unsure",
+            "i'm unsure",
+            "will work on this",
+            "will do some research",
+            "will study on this topic better",
+            "sorry"
+        ]
+
+        if any(phrase in lowered for phrase in uncertainty_phrases):
+            return {"valid": True, "reason": "candidate expressed uncertainty"}
+
+        words = re.findall(r"[A-Za-z][A-Za-z0-9+#.-]*", lowered)
+        unique_words = set(words)
+
+        technical_terms = {
+            "agent", "agents", "task", "tasks", "rag", "retrieval",
+            "embedding", "embeddings", "vector", "database", "prompt",
+            "api", "mcp", "tool", "tools", "model", "chunk", "chunks",
+            "metadata", "deployment", "monitoring", "latency", "eval",
+            "evaluation", "schema", "json", "fallback", "tradeoff",
+            "tradeoffs", "system", "workflow", "automation"
+        }
+
+        if not text:
+            reason = "empty answer"
+        elif len(words) < 5:
+            if any(word in technical_terms for word in words):
+                return {"valid": True, "reason": "short technical answer"}
+            reason = "too short to evaluate"
+
+        elif len(unique_words) <= 2 and len(words) >= 5:
+            reason = "mostly repeated words"
+        elif re.search(r"(.)\1{5,}", lowered):
+            reason = "repeated characters"
+        elif len(re.sub(r"[^a-zA-Z]", "", text)) < max(8, len(text) * 0.35):
+            reason = "not enough recognizable language"
+        else:
+            return {"valid": True, "reason": "answer is evaluable"}
+
+        return {
+            "valid": False,
+            "reason": reason,
+            "retry_prompt": "I couldn't understand that response clearly. Please retry with a complete, grammatical answer.",     
+            }
 
     def _record_answer(self, state, answer):
         if state.transcript:
@@ -158,12 +269,28 @@ class InterviewEngine:
         score = min(5, max(1, len(hits) // 2 + length_bonus + 1))
         understanding = "excellent" if score == 5 else "strong" if score >= 4 else "partial" if score >= 2 else "weak"
         missing = [kw for kw in KEYWORDS.get(day, []) if kw not in text][:3]
-        return {"day": day, "score": score, "understanding": understanding, "strengths": hits[:3], "missing_concepts": missing}
+
+        return {
+            "day": day,
+            "score": score,
+            "understanding": understanding,
+            "strengths": hits[:3],
+            "missing_concepts": missing,
+        }
+
+    def _should_complete(self, state: InterviewState) -> bool:
+        answered = [item for item in state.transcript if item.get("answer")]
+        covered_days = {item["day"] for item in answered if item.get("day")}
+
+        minimum_days = min(8, len(state.plan))
+
+        return len(answered) >= 10 and len(covered_days) >= minimum_days
 
     def _followup(self, evaluation):
         day = evaluation["day"]
         topic = self._topic(day)
         missing = evaluation["missing_concepts"][0] if evaluation["missing_concepts"] else "tradeoffs"
+
         if evaluation["score"] >= 4:
             return f"Good. Let's make {topic['title']} more production-focused: what failure mode would you expect, and what signal would prove your diagnosis?"
         if evaluation["score"] >= 2:
@@ -174,8 +301,17 @@ class InterviewEngine:
         avg = sum(item["score"] for item in state.evaluations) / max(len(state.evaluations), 1)
         strong_days = sorted({item["day"] for item in state.evaluations if item["score"] >= 4})
         weak = [item for item in state.evaluations if item["score"] <= 2]
-        strengths = [f"Strong reasoning in {self._topic(day)['title']}" for day in strong_days[:3]] or ["Stayed engaged across multiple AI engineering topics"]
-        gaps = [f"Review {self._topic(item['day'])['title']}, especially {', '.join(item['missing_concepts'][:2])}" for item in weak[:3]] or ["Add more explicit metrics, tradeoffs, and production failure-mode analysis"]
+
+        strengths = [
+            f"Strong reasoning in {self._topic(day)['title']}"
+            for day in strong_days[:3]
+        ] or ["Stayed engaged across multiple AI engineering topics"]
+
+        gaps = [
+            f"Review {self._topic(item['day'])['title']}, especially {', '.join(item['missing_concepts'][:2])}"
+            for item in weak[:3]
+        ] or ["Add more explicit metrics, tradeoffs, and production failure-mode analysis"]
+
         return {
             "summary": f"{state.candidate.get('member', {}).get('name', 'The candidate')} completed a {state.question_count}-question adaptive interview across {len(set(q['day'] for q in state.transcript))} curriculum days with an average answer score of {avg:.1f}/5.",
             "strengths": strengths,
@@ -186,5 +322,6 @@ class InterviewEngine:
                 "Rehearse MCP, agents, and deployment tradeoffs using examples from the cohort",
             ],
         }
+
 
 interview_engine = InterviewEngine()

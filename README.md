@@ -218,3 +218,14 @@ AI assistance was used during planning, implementation, debugging, testing, and 
 ## Attribution
 
 InterviewOS was built during the hackathon by extending a pre-existing Flask interview-room prototype that included optional audio/video utilities. The adaptive interview engine, curriculum and candidate JSON integration, candidate dashboard, answer validation, scoring, feedback generation, and downloadable readiness report were implemented for this hackathon.
+
+## Documentation
+
+- [Architecture](ARCHITECTURE.md)
+- [AI Usage Log](PROMPTS-Suzanne.md)
+- [Technical Specification](technical-spec.md)
+
+## Contributors
+
+- [Suzanne Daniel Thomas](https://github.com/suzannet-menon)
+- [Ruchira Jagshettiwar](https://github.com/ruchirajags)

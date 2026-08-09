@@ -1,4 +1,4 @@
-﻿let questionHistory = [];
+let questionHistory = [];
 let currentQuestion = "";
 let questionCount = 0;
 let interviewActive = false;
@@ -44,6 +44,19 @@ async function fetchCandidate() {
 
 async function startInterview() {
     if (interviewActive) return;
+
+    const currentCandidateId = document.getElementById("metaCandidateId")?.value?.trim();
+    const currentSessionId = window.sessionId || (typeof roomId !== "undefined" && roomId ? roomId : sessionId);
+
+    if (!currentCandidateId || !currentSessionId) {
+        showStatus("Error: Missing Candidate ID or Session ID. Please select a candidate first.", "error");
+        setQuestionStatus("error");
+        return;
+    }
+
+    candidateId = currentCandidateId;
+    sessionId = currentSessionId;
+    candidatePayload = null; // Reset to ensure the fresh candidate ID is used
 
     const modal = document.getElementById("permissionModal");
     if (modal) modal.style.display = "none";

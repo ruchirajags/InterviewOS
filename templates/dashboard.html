@@ -584,7 +584,7 @@
     </script>
 
     <!-- roomId defined before external scripts -->
-    <script>const roomId = "";</script>
+    <script>const roomId = crypto.randomUUID();</script>
 
     <!-- External JS — load order matters. Overrides happen in the block BELOW. -->
     <script src="/static/js/socket.js"></script>

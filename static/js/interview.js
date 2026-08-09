@@ -33,32 +33,66 @@ function initInterview() {
 }
 
 async function fetchCandidate() {
-    if (!candidateId) return { id: candidateId };
-    const res = await fetch("/api/candidates");
-    const data = await res.json();
-    const found = data.candidates.find(c => c.member?.id === candidateId);
-    return found || { id: candidateId };
+    if (candidatePayload) return candidatePayload;
+
+    if (candidateId) {
+        return { id: candidateId };
+    }
+
+    return { id: "" };
 }
 
 async function startInterview() {
     if (interviewActive) return;
+
+    const modal = document.getElementById("permissionModal");
+    if (modal) modal.style.display = "none";
+
     interviewActive = true;
-    document.getElementById("startBtn").disabled = true;
-    document.getElementById("startBtn").textContent = "Interview in progress";
+
+    const startBtn = document.getElementById("startBtn");
+    if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.textContent = "Interview in progress";
+    }
+
     document.getElementById("submitAnswerBtn").disabled = false;
     document.getElementById("recordBtn").disabled = false;
+
     showStatus("Creating personalized interview plan...", "info");
     setQuestionStatus("thinking");
     startCountdownTimer();
 
-    candidatePayload = await fetchCandidate();
-    const res = await fetch("/api/interview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, candidate: candidatePayload })
-    });
-    const data = await res.json();
-    handleInterviewResponse(data);
+    try {
+        candidatePayload = await fetchCandidate();
+
+        const res = await fetch("/api/interview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, candidate: candidatePayload })
+        });
+
+        const data = await res.json();
+        console.log("Start interview response:", data);
+
+        if (!res.ok) {
+            throw new Error(data.error || "Could not start interview");
+        }
+
+        handleInterviewResponse(data);
+    } catch (err) {
+        console.error("Start interview failed:", err);
+        interviewActive = false;
+        clearInterval(interviewTimer);
+
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.textContent = "Start Interview";
+        }
+
+        showStatus("Could not start interview: " + err.message, "error");
+        setQuestionStatus("error");
+    }
 }
 
 async function submitTypedAnswer() {
@@ -100,7 +134,26 @@ function handleInterviewResponse(data) {
 
     if (data.needs_retry) {
     currentQuestion = sanitizeAiText(data.reply);
-    document.getElementById("question").textContent = currentQuestion;
+
+const questionEl = document.getElementById("question");
+if (questionEl) {
+    questionEl.innerHTML = "";
+
+    const parts = currentQuestion.split("Question:");
+    const msg = document.createElement("div");
+    msg.textContent = parts[0].trim();
+
+    const spacer = document.createElement("div");
+    spacer.style.height = "14px";
+
+    const q = document.createElement("div");
+    q.textContent = parts.length > 1 ? "Question:" + parts.slice(1).join("Question:").trim() : "";
+
+    questionEl.appendChild(msg);
+    questionEl.appendChild(spacer);
+    questionEl.appendChild(q);
+}
+
     updateProgress(data.state);
     updateJourney(data.state);
     setQuestionStatus("waiting");
@@ -137,14 +190,34 @@ function handleInterviewResponse(data) {
 }
 
 async function endInterview() {
-    if (!interviewActive) {
-        displayFeedback({ summary: "Interview ended before completion.", strengths: [], gaps: ["Complete the full adaptive interview for a stronger report."], next: ["Restart with a candidate profile and answer all questions."] });
-        return;
+    interviewActive = false;
+    clearInterval(interviewTimer);
+
+    setQuestionStatus("done");
+
+    const submitBtn = document.getElementById("submitAnswerBtn");
+    const recordBtn = document.getElementById("recordBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const startBtn = document.getElementById("startBtn");
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (recordBtn) recordBtn.disabled = true;
+    if (stopBtn) stopBtn.disabled = true;
+    if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.textContent = "Interview ended";
     }
-    while (questionCount < MAX_QUESTIONS) {
-        await sendAnswer("I would approach this by checking the architecture, validating assumptions, comparing alternatives, and using concrete metrics to decide next steps.");
-        if (!interviewActive) break;
-    }
+
+    displayFeedback({
+        summary: "Interview ended before completion. Complete the full adaptive interview to generate a scored readiness report.",
+        strengths: questionHistory.length
+            ? ["Started the interview and engaged with the technical prompts."]
+            : ["No evaluated answers were submitted."],
+        gaps: ["The interview was ended before enough evidence was collected."],
+        next: ["Restart the interview and answer all questions to receive a complete report."]
+    });
+
+    showStatus("Interview ended. No additional answers were generated.", "warning");
 }
 
 function displayFeedback(feedback) {

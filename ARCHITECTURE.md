@@ -1,97 +1,224 @@
-﻿# InterviewOS File Architecture
+﻿# InterviewOS Architecture
 
-This project is a trimmed hackathon build based on the InterviewOs interview-room boilerplate.
+## Purpose
+
+InterviewOS is an adaptive AI technical interviewer for AI Cohort graduates.
+
+The application uses the provided curriculum and candidate profile JSON files to conduct a personalized interview, evaluate candidate answers, maintain session context, and generate a downloadable readiness report.
+
+## System Overview
+
+```mermaid
+flowchart TD
+    A["Candidate JSON"] --> B["Candidate Analyzer"]
+    B --> C["Candidate Signals"]
+    D["Curriculum JSON"] --> E["Curriculum Loader"]
+    E --> F["Curriculum Day Map"]
+    C --> G["Interview Planner"]
+    F --> G
+    G --> H["Interview State"]
+    H --> I["Question Generator"]
+    I --> J["Interview UI"]
+    J --> K["Candidate Answer"]
+    K --> L["Answer Validator"]
+    L --> M["Answer Evaluator"]
+    M --> N["Follow-up Decision Engine"]
+    N --> H
+    H --> O["Feedback Generator"]
+    O --> P["HTML Report Renderer"]
+```
+
+## Runtime Data Flow
+
+```mermaid
+flowchart LR
+    A["data/candidates.json"] --> B["/api/candidates"]
+    C["data/curriculum.json"] --> B
+    B --> D["Candidate Dashboard"]
+    D --> E["Selected Candidate"]
+    E --> F["POST /api/interview"]
+    F --> G["InterviewEngine.start"]
+    G --> H["Session Plan"]
+    H --> I["Question"]
+    I --> J["Candidate Answer"]
+    J --> K["InterviewEngine.turn"]
+    K --> L["Validation + Scoring"]
+    L --> M["Follow-up or Next Topic"]
+    M --> N["Final Feedback"]
+    N --> O["report_download.html"]
+```
 
 ## Tech Stack
 
-- Flask: Python web server, HTML template rendering, and API routes.
-- Flask-SocketIO: real-time signaling support for the existing video/WebRTC room.
-- Vanilla HTML/CSS/JavaScript: no frontend build step, fast to deploy/debug.
-- Pydantic: request validation for API payloads.
-- Sarvam AI SDK: optional TTS/STT support inherited from InterviewOs.
-- In-memory Python dictionaries: session/report state for the hackathon demo.
-- JSON files: supplied curriculum and candidate profiles.
+### Backend
 
-## Why Flask Is Relevant
+- Flask for web routes, API endpoints, and template rendering.
+- Pydantic for request validation.
+- In-memory Python dictionaries for hackathon session state.
+- JSON files as the source of truth for curriculum and candidate data.
 
-Flask is useful here because the boilerplate already uses it and the hackathon API contract is small. We only need:
+### Frontend
 
-- A landing/dashboard page.
-- An interview room page.
-- `POST /api/interview`.
-- A few helper API routes.
-- Optional audio/video endpoints.
+- Vanilla HTML, CSS, and JavaScript.
+- No frontend build step.
+- Candidate dashboard and interview room rendered through Flask templates.
 
-Using Flask avoids adding React/Vite/FastAPI migration work when the remaining time is tight.
+### Optional Media Layer
 
-## Required Product Flow
+- Flask-SocketIO for interview-room signaling.
+- WebRTC utilities for optional video room behavior.
+- Sarvam AI utilities preserved for optional STT/TTS features.
+
+The core hackathon flow is text-first and does not depend on voice or video.
+
+## Core Product Flow
 
 ```text
-/                          -> candidate dashboard
-/api/candidates             -> candidate cards from candidates.json
-/api/interview/create       -> creates a room for a selected candidate
+/                          -> landing page
+/dashboard                 -> candidate dashboard
+/api/candidates             -> candidate list from JSON
+/api/interview/create       -> creates interview room metadata
 /interview/<room_id>        -> candidate-specific interview room
-/api/interview              -> required adaptive interview endpoint
-/api/interview/<id>/report/download -> downloadable readiness report
+/api/interview              -> required adaptive interview API
+/api/interview/<id>/report/download -> downloadable report
+```
+
+## Required Endpoint
+
+### `POST /api/interview`
+
+This is the main hackathon endpoint.
+
+It supports two modes:
+
+### 1. Start Interview
+
+Request:
+
+```json
+{
+  "sessionId": "CAND-001-ABCD",
+  "candidate": {
+    "id": "CAND-001"
+  }
+}
+```
+
+Behavior:
+
+- finds the candidate profile
+- analyzes the candidate journey
+- creates an interview plan
+- initializes session state
+- returns the first question
+
+### 2. Continue Interview
+
+Request:
+
+```json
+{
+  "sessionId": "CAND-001-ABCD",
+  "message": "Candidate answer text"
+}
+```
+
+Behavior:
+
+- validates the answer
+- rejects gibberish without advancing
+- evaluates valid answers
+- decides follow-up or next topic
+- updates session memory
+- returns next question or final feedback
+
+## Directory Structure
+
+```text
+InterviewOS/
+├── ai/
+├── data/
+├── models/
+├── routes/
+├── services/
+├── static/
+├── templates/
+├── utils/
+├── webrtc/
+├── app.py
+├── config.py
+├── requirements.txt
+├── README.md
+├── ARCHITECTURE.md
+├── PROMPTS.md
+└── technical-spec.md
 ```
 
 ## Root Files
 
-### app.py
+### `app.py`
 
-Creates the Flask app, registers blueprints, registers WebRTC socket events, and starts the server.
+Creates the Flask application, registers blueprints, configures Socket.IO, and starts the server.
 
-It no longer initializes SQLite because persistent accounts/history are out of scope.
+### `config.py`
 
-### config.py
+Stores app configuration such as host, port, debug mode, secret key, audio folder paths, optional Sarvam API key, and WebRTC STUN server config.
 
-Central configuration for host, port, debug mode, Sarvam API settings, audio output folders, and WebRTC STUN server.
+### `requirements.txt`
 
-`DATABASE_PATH` can be ignored now; it is leftover config and not used by the current runtime.
+Lists Python dependencies needed to run the app.
 
-### requirements.txt
+### `README.md`
 
-Python dependencies required to run the app.
+Judge-facing overview of the project, setup instructions, API contract, and demo flow.
 
-### README.md
+### `ARCHITECTURE.md`
 
-Judge-facing project explanation: problem, solution, architecture, API contract, run instructions, and demo flow.
+Explains the file structure, system design, and runtime flow.
 
-### PROMPTS.md
+### `PROMPTS.md`
 
-AI usage log required by the hackathon authenticity review. Keep adding entries as you use AI.
+AI usage log for hackathon authenticity review.
 
-### technical-spec.md
+### `technical-spec.md`
 
-Copied official API contract/spec from the hackathon.
+Provided technical specification for the hackathon.
 
-### .env / .env.example
+## Data Layer
 
-Environment variables. `.env` may contain local keys and should not be committed if it has secrets. `.env.example` is safe to keep as a template.
+### `data/curriculum.json`
 
-### .gitignore
+Contains the 31-day AI Cohort curriculum.
 
-Prevents generated files, virtual environments, audio outputs, and secrets from being committed.
+Used for:
 
-### LICENSE
+- curriculum day lookup
+- module/topic mapping
+- interview topic planning
+- expected answer direction
 
-Can be kept if you want the public repo to have clear usage terms. It is not required by the hackathon, but harmless.
+### `data/candidates.json`
 
-## data/
+Contains synthetic candidate profiles.
 
-### data/curriculum.json
+Used for:
 
-Official 31-day AI Cohort curriculum. Used as the interview knowledge source.
+- dashboard cards
+- candidate-specific interview planning
+- completed/skipped/weak topic analysis
 
-### data/candidates.json
+## Services
 
-Official synthetic candidate profiles. Used by the dashboard and candidate analyzer.
+### `services/cohort_data.py`
 
-## services/
+Loads and maps cohort data.
 
-### services/cohort_data.py
+Responsibilities:
 
-Loads curriculum and candidate JSON files. Also maps curriculum days to modules and finds candidates by ID.
+- load curriculum JSON
+- load candidate JSON
+- find candidate by ID
+- map curriculum days to modules/topics
 
 Used by:
 
@@ -99,228 +226,307 @@ Used by:
 - `services/candidate_analyzer.py`
 - `services/interview_engine.py`
 
-### services/candidate_analyzer.py
+### `services/candidate_analyzer.py`
 
-Turns raw candidate missions into interviewer metadata:
+Turns raw candidate data into interview planning signals.
+
+Outputs include:
 
 - completed days
 - skipped days
-- failed days
+- failed or weak days
 - strong days
-- probe days
-- difficulty
+- difficulty level
+- candidate summary
 
-This is what makes the interview personalized.
+### `services/interview_engine.py`
 
-### services/interview_engine.py
+Core interview logic.
 
-The core product brain.
+Responsibilities:
 
-Responsible for:
+- create `InterviewState`
+- plan interview topics
+- generate questions
+- validate answers
+- score answers
+- decide follow-up vs next topic
+- maintain transcript and evaluations
+- generate final feedback
 
-- creating `InterviewState`
-- planning 8 curriculum topics
-- asking 10 questions
-- evaluating each answer
-- deciding follow-up vs next topic
-- generating final structured feedback
+This file satisfies most of the hackathon requirements.
 
-This is the file that satisfies most of the problem statement.
+## Routes
 
-## routes/
-
-### routes/interview_routes.py
+### `routes/interview_routes.py`
 
 Main product routes.
 
 Important endpoints:
 
-- `GET /api/candidates`
-- `POST /api/interview`
-- `POST /api/interview/create`
-- `GET /interview/<room_id>`
-- `GET /api/interview/<room_id>/report/download`
+```text
+GET  /dashboard
+GET  /api/candidates
+POST /api/interview
+POST /api/interview/create
+GET  /interview/<room_id>
+GET  /api/interview/<room_id>/report/download
+```
 
-### routes/ai_routes.py
+Also handles saving final feedback and enriched question-by-question report data.
 
-Legacy InterviewOs optional AI routes:
+### `routes/ai_routes.py`
 
-- `/api/ai/question`
-- `/api/ai/report`
-- `/api/ai/transcribe`
+Optional AI/voice-related routes from the interview-room layer.
 
-The new core flow does not depend on these, but they are kept for optional voice/STT/TTS enhancement.
+The required text interview flow does not depend on this file.
 
-## models/
+## Models
 
-### models/interview.py
+### `models/interview.py`
 
-In-memory room/report store.
+In-memory interview store.
 
 Stores:
 
 - room ID
 - candidate name
 - candidate ID
+- role
+- answers
 - report
-- transcript
+- question-answer history
 - status
+- timestamps
 
-This replaced SQLite to keep the hackathon build lean.
+This is intentionally lightweight because persistent user accounts and long-term history are out of scope.
 
-## templates/
+## Templates
 
-### templates/index.html
+### `templates/index.html`
 
-Landing page plus candidate dashboard. Fetches `/api/candidates` and creates candidate-specific rooms.
+Landing page with product hero, dashboard preview, navigation, and responsive layout.
 
-### templates/create_interview.html
+### `templates/dashboard.html`
 
-Legacy create-interview page. Not central to the current flow, but harmless if someone visits `/interview/create`.
+Primary candidate dashboard and interview workspace.
 
-### templates/interview_room.html
+Includes:
 
-Main interview UI.
-
-Contains:
-
-- optional video panels
-- topic/question progress
-- interview journey sidebar
-- typed answer box
-- optional voice recording controls
-- final report section
+- candidate list
+- profile summary
+- candidate-specific interview room
+- current question
+- answer box
+- optional media controls
+- feedback panel
 - download report button
 
-## static/
+### `templates/interview_room.html`
 
-### static/css/style.css
+Legacy standalone room template with optional video/audio support.
 
-Design system and page styling.
+### `templates/create_interview.html`
 
-Includes old InterviewOs styles plus new candidate dashboard, journey, typed-answer, and report styles.
+Legacy create-room page. It is not central to the main demo flow.
 
-### static/js/interview.js
+### `templates/report_download.html`
+
+Downloadable HTML readiness report.
+
+Includes:
+
+- candidate name
+- role/session
+- questions answered
+- curriculum days covered
+- overall score
+- summary
+- strengths
+- gaps
+- next steps
+- question-by-question analysis
+- generated date/time
+- print/save PDF support
+
+## Static Files
+
+### `static/js/interview.js`
 
 Frontend interview loop.
 
-Calls:
+Responsibilities:
 
-- `GET /api/candidates`
-- `POST /api/interview`
+- start interview
+- send answers to `/api/interview`
+- render questions
+- update progress
+- show invalid-answer retry messages
+- display final feedback
+- control report button visibility
 
-Updates:
+### `static/js/audio.js`
 
-- current question
-- progress bar
-- topic badge
-- journey sidebar
-- final report
+Optional voice recording path. Voice transcript can be submitted into the same interview engine.
 
-### static/js/audio.js
+### `static/js/webrtc.js`
 
-Optional voice recording and speech-to-text path. It eventually calls `sendAnswer(answer)`, so voice and typed answers share the same interview engine.
+Optional media/video behavior.
 
-### static/js/webrtc.js
+### `static/js/socket.js`
 
-Existing browser media/video logic.
+Socket.IO helper for optional media room signaling.
 
-### static/js/socket.js
+### `static/css/dashboard.css`
 
-Socket.IO connection helper for WebRTC signaling.
+Dashboard and interview workspace styling.
 
-### static/audio/
+### `static/css/landing.css`
 
-Generated audio files for TTS and recorded answers if the optional audio path is used.
+Landing page styling.
 
-## ai/
+### `static/css/interview_room.css`
 
-### ai/question_engine.py
+Standalone room styling.
 
-Legacy generic question generator using Sarvam. Not used by the new required `/api/interview` flow.
+### `static/css/style.css`
 
-Kept only as optional fallback/extension.
+Legacy shared styles from the earlier interview-room prototype.
 
-### ai/report_engine.py
+## Utils
 
-Legacy generic report generator using Sarvam. Not used by the new required feedback path.
+### `utils/validation.py`
 
-Kept only as optional fallback/extension.
+Pydantic request models.
 
-### ai/stt_engine.py
+Validates:
 
-Optional speech-to-text helper for recorded candidate answers.
+- interview start request
+- interview turn request
+- create-room request
+- save-answers request
 
-### ai/tts_engine.py
+### `utils/sanitization.py`
 
-Optional text-to-speech helper for AI interviewer voice.
+Cleans AI-generated or user-provided text output.
 
-## utils/
+### `utils/timer.py`
 
-### utils/validation.py
+Timer helper retained from the interview-room layer.
 
-Pydantic request models for both legacy InterviewOs endpoints and the required hackathon endpoint.
+### `utils/audio_recorder.py`
 
-### utils/sanitization.py
+Optional audio helper.
 
-Cleans AI output and removes hidden reasoning tags.
+## AI Layer
 
-### utils/timer.py
+### `ai/stt_engine.py`
 
-Legacy timer utility. The current frontend also manages its own timer.
+Optional speech-to-text helper.
 
-### utils/audio_recorder.py
+### `ai/tts_engine.py`
 
-Legacy audio helper. Kept because the audio path is still a secondary enhancement.
+Optional text-to-speech helper.
 
-## webrtc/
+### `ai/question_engine.py`
 
-### webrtc/signaling.py
+Legacy generic question generator. Not used by the main adaptive `/api/interview` flow.
 
-Socket.IO signaling events for browser video rooms.
+### `ai/report_engine.py`
 
-### webrtc/room_manager.py
+Legacy generic report generator. Not used by the main readiness report flow.
 
-Tracks WebRTC rooms/participants.
+## WebRTC Layer
 
-### webrtc/__init__.py
+### `webrtc/signaling.py`
 
-Package marker.
+Socket.IO events for optional browser media signaling.
 
-## Removed Files
+### `webrtc/room_manager.py`
 
-These were removed because they are not needed for the hackathon submission:
+Tracks optional media room participants.
 
-- `.github/`
-- `CODE_OF_CONDUCT.md`
-- `CONTRIBUTING.md`
-- `Security.md`
-- `setup.py`
-- `database/`
-- `__pycache__/`
+## Interview Engine Details
 
-## What To Keep For Final Submission
+### Session State
 
-Keep:
+Each interview is tracked by `sessionId`.
 
-- `README.md`
-- `PROMPTS.md`
-- `technical-spec.md`
-- `data/`
-- `services/`
-- `routes/`
-- `templates/`
-- `static/`
-- `ai/`
-- `webrtc/`
-- `utils/`
-- `models/`
-- `requirements.txt`
-- `app.py`
-- `config.py`
+The session stores:
 
-Do not commit:
+- candidate profile
+- interview plan
+- current topic index
+- question count
+- transcript
+- evaluations
+- last question
+- completion status
 
-- `.env` if it contains real keys
-- `venv/`
-- generated audio files unless needed for demo screenshots
+### Answer Validation
+
+The backend rejects empty answers, random gibberish, repeated meaningless text, and unusable responses.
+
+The backend accepts but scores weakly uncertainty such as "I am not sure", partial technical answers, and vague answers with some relevant meaning.
+
+### Scoring
+
+Answer scoring considers:
+
+- topic-specific keywords
+- technical depth signals
+- tradeoff/metric/evaluation language
+- weak or vague wording
+- uncertainty signals
+
+Each answer receives:
+
+- score
+- understanding level
+- strengths
+- missing concepts
+- expected answer direction
+
+### Completion Logic
+
+The interview completes after enough answered questions and enough planned curriculum coverage.
+
+This prevents the interview from ending too early due to follow-up questions.
+
+## Report Generation
+
+When the interview completes:
+
+1. final feedback is generated
+2. transcript and evaluations are saved in memory
+3. report download route renders `report_download.html`
+4. browser downloads an HTML file
+5. evaluator can print or save it as PDF
+
+## Why Flask
+
+Flask is appropriate for this hackathon because the API contract is small, the project is Python-based, templates avoid a frontend build step, JSON files are easy to load server-side, and fast local development/deployment is possible.
+
+Using Flask reduced migration work and allowed more time for the adaptive interview logic.
+
+## Design Choices
+
+### Text-first interview
+
+Voice and video are optional. The required flow works through text so judging does not depend on microphone permissions or external voice APIs.
+
+### In-memory state
+
+Persistent accounts and long-term history are out of scope, so in-memory session state is enough for the demo.
+
+### Deterministic scoring
+
+The interview engine uses transparent scoring rules instead of relying fully on an external model. This keeps the demo reliable even with limited API access.
+
+### HTML report
+
+The downloadable report is HTML because it is easy to style, inspect, download, and save as PDF from the browser.
+
+## Attribution
+
+InterviewOS was built during the hackathon by extending a pre-existing Flask interview-room prototype that included optional audio/video utilities. The adaptive interview engine, curriculum and candidate JSON integration, candidate dashboard, answer validation, scoring, feedback generation, and downloadable readiness report were implemented for this hackathon.

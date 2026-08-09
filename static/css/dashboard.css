@@ -1514,4 +1514,494 @@
     .db-video-grid {
         grid-template-columns: 1fr;
     }
+
+    .answer-composer {
+        position: relative;
+}
+
+.answer-textarea {
+    min-height: 190px;
+    resize: vertical;
+    padding-right: 64px;
+    line-height: 1.55;
+}
+
+.answer-actions {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-action {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.icon-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.icon-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.icon-submit {
+    background: #c8f000;
+    color: #111;
+}
+
+.icon-record {
+    background: #111827;
+    color: #ffffff;
+}
+
+.icon-stop {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.answer-display {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #374151;
+}
+
+.answer-display-muted {
+    opacity: 0.72;
+}
+
+.submitted-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+}
+
+.answer-display p {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.report-section,
+#reportSection {
+    position: relative;
+    z-index: 5;
+    clear: both;
+    margin-top: 28px;
+    width: 100%;
+}
+
+#reportSection .btn,
+.report-section .btn,
+#downloadReportBtn {
+    position: relative;
+    z-index: 10;
+}
+
+@media (max-width: 760px) {
+    .answer-textarea {
+        min-height: 170px;
+        padding-right: 14px;
+        padding-bottom: 64px;
+    }
+
+    .answer-actions {
+        left: 12px;
+        right: auto;
+    }
+}
+
+/* Final interview room polish */
+.answer-composer {
+    position: relative;
+    width: 100%;
+}
+
+.answer-textarea {
+    width: 100%;
+    min-height: 240px;
+    resize: vertical;
+    padding: 18px 78px 18px 18px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.answer-actions {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-action {
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.icon-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+.icon-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.icon-submit {
+    background: var(--db-accent);
+    color: #ffffff;
+}
+
+.icon-record {
+    background: #111827;
+    color: #ffffff;
+}
+
+.icon-stop {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.answer-display {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    background: var(--db-border-soft);
+    color: var(--db-ink-soft);
+}
+
+.answer-display-muted {
+    opacity: 0.7;
+}
+
+/* Make final feedback occupy the full selected-candidate dashboard */
+#candidatePanel.db-report-mode .db-ws-video,
+#candidatePanel.db-report-mode .db-ws-ai,
+#candidatePanel.db-report-mode .db-ws-journey,
+#candidatePanel.db-report-mode .db-ws-section-label,
+#candidatePanel.db-report-mode .db-answer-hint,
+#candidatePanel.db-report-mode .answer-composer,
+#candidatePanel.db-report-mode .answer-display,
+#candidatePanel.db-report-mode .db-progress-wrap {
+    display: none !important;
+}
+
+#candidatePanel.db-report-mode .db-workspace {
+    display: block;
+    overflow-y: auto;
+}
+
+#candidatePanel.db-report-mode .db-ws-bottom {
+    display: block;
+    min-height: auto;
+}
+
+#candidatePanel.db-report-mode .db-ws-answer {
+    padding: 32px 44px;
+    width: 100%;
+}
+
+#candidatePanel.db-report-mode .db-report {
+    display: block;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 36px;
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-lg);
+    background: var(--db-surface);
+}
+
+#candidatePanel.db-report-mode .db-report-title {
+    font-size: 1.25rem;
+}
+
+#candidatePanel.db-report-mode .db-report-content p {
+    font-size: 0.95rem;
+}
+
+#candidatePanel.db-report-mode .db-report-content h4 {
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+#candidatePanel.db-report-mode .db-report-content li {
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+#candidatePanel.db-report-mode .db-report-actions {
+    margin-top: 22px;
+}
+
+@media (max-width: 760px) {
+    .answer-textarea {
+        min-height: 210px;
+        padding: 16px 16px 78px;
+    }
+
+    .answer-actions {
+        left: 16px;
+        right: auto;
+    }
+
+    #candidatePanel.db-report-mode .db-ws-answer {
+        padding: 22px 16px;
+    }
+
+    #candidatePanel.db-report-mode .db-report {
+        padding: 22px 18px;
+    }
+}
+}
+/* Final clean dashboard interview blocks */
+
+.db-page .answer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.db-page .answer-composer {
+    position: relative;
+    width: 100%;
+    min-height: 245px;
+    border: 1px solid var(--db-border);
+    border-radius: 18px;
+    background: var(--db-surface);
+    box-shadow: 0 14px 36px rgba(17, 17, 17, 0.06);
+    overflow: hidden;
+}
+
+.db-page textarea.form-input.answer-textarea,
+.db-page .answer-textarea {
+    width: 100%;
+    min-height: 245px;
+    resize: vertical;
+    border: 0;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 22px 86px 82px 22px;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--db-ink);
+}
+
+.db-page textarea.form-input.answer-textarea:focus,
+.db-page .answer-textarea:focus {
+    border: 0;
+    box-shadow: none;
+}
+
+.db-page .answer-actions {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--db-border);
+    box-shadow: 0 12px 30px rgba(17, 17, 17, 0.12);
+    z-index: 5;
+}
+
+.db-page .icon-action {
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.db-page .icon-action svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+}
+
+.db-page .icon-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.16);
+}
+
+.db-page .icon-action:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+}
+
+.db-page .icon-submit {
+    background: var(--db-accent);
+    color: #ffffff;
+}
+
+.db-page .icon-record {
+    background: #9ca3af;
+    color: #ffffff;
+}
+
+.db-page .icon-stop {
+    background: #fca5a5;
+    color: #ffffff;
+}
+
+.db-page #liveTranscript,
+.db-page .db-transcript-box,
+.db-page .transcript-box {
+    width: 100%;
+    padding: 15px 17px;
+    border: 1px dashed var(--db-accent-soft);
+    border-radius: 16px;
+    background: var(--db-accent-bg);
+    color: var(--db-ink-soft);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    font-style: normal;
+}
+
+.db-page .answer-display {
+    width: 100%;
+    margin-top: 14px;
+    padding: 16px 18px;
+    border: 1px solid var(--db-border);
+    border-radius: 16px;
+    background: var(--db-surface);
+    color: var(--db-ink);
+    box-shadow: 0 12px 30px rgba(17, 17, 17, 0.05);
+}
+
+.db-page .answer-display .submitted-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--db-ink-mute);
+}
+
+.db-page .answer-display p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+/* Final report view */
+#candidatePanel.db-report-mode .db-ws-video,
+#candidatePanel.db-report-mode .db-ws-ai,
+#candidatePanel.db-report-mode .db-ws-journey,
+#candidatePanel.db-report-mode .answer-stack,
+#candidatePanel.db-report-mode .answer-display,
+#candidatePanel.db-report-mode .db-answer-hint,
+#candidatePanel.db-report-mode .db-ws-section-label {
+    display: none !important;
+}
+
+#candidatePanel.db-report-mode .db-workspace {
+    display: block;
+    overflow-y: auto;
+}
+
+#candidatePanel.db-report-mode .db-ws-bottom {
+    display: block;
+    width: 100%;
+}
+
+#candidatePanel.db-report-mode .db-ws-answer {
+    width: 100%;
+    padding: 34px 48px;
+    display: block;
+}
+
+#candidatePanel.db-report-mode .db-report {
+    display: block !important;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 34px 38px;
+    border: 1px solid var(--db-border);
+    border-radius: 18px;
+    background: var(--db-surface);
+    box-shadow: 0 18px 48px rgba(17, 17, 17, 0.08);
+}
+
+.db-page .db-report-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    align-items: center;
+}
+
+.db-page #downloadReportBtn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 20;
+}
+
+@media (max-width: 760px) {
+    .db-page .answer-composer,
+    .db-page textarea.form-input.answer-textarea,
+    .db-page .answer-textarea {
+        min-height: 220px;
+    }
+
+    .db-page textarea.form-input.answer-textarea,
+    .db-page .answer-textarea {
+        padding: 18px 18px 84px 18px;
+    }
+
+    .db-page .answer-actions {
+        left: 16px;
+        right: auto;
+        bottom: 16px;
+    }
+
+    #candidatePanel.db-report-mode .db-ws-answer {
+        padding: 22px 16px;
+    }
+
+    #candidatePanel.db-report-mode .db-report {
+        padding: 24px 18px;
+    }
 }

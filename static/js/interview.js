@@ -24,11 +24,23 @@ function sanitizeAiText(text) {
         .trim();
 }
 
+function escapeHtml(text) {
+    return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function initInterview() {
     roleValue = document.getElementById("metaRole")?.value || roleValue;
     candidateId = document.getElementById("metaCandidateId")?.value || "";
     sessionId = typeof roomId !== "undefined" ? roomId : crypto.randomUUID();
-    document.getElementById("stopBtn").disabled = true;
+
+    const stopBtn = document.getElementById("stopBtn");
+    if (stopBtn) stopBtn.disabled = true;
+
     updateProgress();
 }
 
@@ -56,7 +68,7 @@ async function startInterview() {
 
     candidateId = currentCandidateId;
     sessionId = currentSessionId;
-    candidatePayload = null; // Reset to ensure the fresh candidate ID is used
+    candidatePayload = null;
 
     const modal = document.getElementById("permissionModal");
     if (modal) modal.style.display = "none";
@@ -69,8 +81,11 @@ async function startInterview() {
         startBtn.textContent = "Interview in progress";
     }
 
-    document.getElementById("submitAnswerBtn").disabled = false;
-    document.getElementById("recordBtn").disabled = false;
+    const submitBtn = document.getElementById("submitAnswerBtn");
+    const recordBtn = document.getElementById("recordBtn");
+
+    if (submitBtn) submitBtn.disabled = false;
+    if (recordBtn) recordBtn.disabled = false;
 
     showStatus("Creating personalized interview plan...", "info");
     setQuestionStatus("thinking");
@@ -111,11 +126,13 @@ async function startInterview() {
 async function submitTypedAnswer() {
     const input = document.getElementById("typedAnswer");
     const answer = input.value.trim();
+
     if (!answer) {
         showStatus("Type an answer before submitting.", "warning");
         input.focus();
         return;
     }
+
     input.value = "";
     await sendAnswer(answer);
 }
@@ -129,7 +146,11 @@ async function sendAnswer(answerText) {
 
     const answerDisplay = document.getElementById("answerDisplay");
     if (answerDisplay) {
-        answerDisplay.textContent = `Your answer: "${answerText}"`;
+        answerDisplay.classList.remove("answer-display-muted");
+        answerDisplay.innerHTML = `
+            <span class="submitted-label">Last submitted answer</span>
+            <p>${escapeHtml(answerText)}</p>
+        `;
         answerDisplay.style.display = "block";
     }
 
@@ -171,47 +192,57 @@ function handleInterviewResponse(data) {
     }
 
     if (data.needs_retry) {
-    currentQuestion = sanitizeAiText(data.reply);
+        currentQuestion = sanitizeAiText(data.reply);
 
-const questionEl = document.getElementById("question");
-if (questionEl) {
-    questionEl.innerHTML = "";
+        const questionEl = document.getElementById("question");
+        if (questionEl) {
+            questionEl.innerHTML = "";
 
-    const parts = currentQuestion.split("Question:");
-    const msg = document.createElement("div");
-    msg.textContent = parts[0].trim();
+            const parts = currentQuestion.split("Question:");
 
-    const spacer = document.createElement("div");
-    spacer.style.height = "14px";
+            const msg = document.createElement("div");
+            msg.textContent = parts[0].trim();
 
-    const q = document.createElement("div");
-    q.textContent = parts.length > 1 ? "Question:" + parts.slice(1).join("Question:").trim() : "";
+            const spacer = document.createElement("div");
+            spacer.style.height = "14px";
 
-    questionEl.appendChild(msg);
-    questionEl.appendChild(spacer);
-    questionEl.appendChild(q);
-}
+            const q = document.createElement("div");
+            q.textContent = parts.length > 1
+                ? "Question:" + parts.slice(1).join("Question:").trim()
+                : "";
 
-    updateProgress(data.state);
-    updateJourney(data.state);
-    setQuestionStatus("waiting");
+            questionEl.appendChild(msg);
+            questionEl.appendChild(spacer);
+            questionEl.appendChild(q);
+        }
 
-    const input = document.getElementById("typedAnswer");
-    if (input) input.focus();
+        updateProgress(data.state);
+        updateJourney(data.state);
+        setQuestionStatus("waiting");
 
-    showStatus(`Please retry: ${data.quality?.reason || "answer was unclear"}.`, "warning");
-    return;
+        const input = document.getElementById("typedAnswer");
+        if (input) input.focus();
+
+        showStatus(`Please retry: ${data.quality?.reason || "answer was unclear"}.`, "warning");
+        return;
     }
 
-    
     if (data.done) {
         interviewActive = false;
         clearInterval(interviewTimer);
+
         setQuestionStatus("done");
-        document.getElementById("submitAnswerBtn").disabled = true;
-        document.getElementById("recordBtn").disabled = true;
-        document.getElementById("stopBtn").disabled = true;
-        document.getElementById("question").textContent = data.reply || "Interview completed.";
+
+        const submitBtn = document.getElementById("submitAnswerBtn");
+        const recordBtn = document.getElementById("recordBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const questionEl = document.getElementById("question");
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (recordBtn) recordBtn.disabled = true;
+        if (stopBtn) stopBtn.disabled = true;
+        if (questionEl) questionEl.textContent = data.reply || "Interview completed.";
+
         displayFeedback(data.feedback || {});
         showStatus("Interview complete. Your report is ready.", "success");
         return;
@@ -220,7 +251,15 @@ if (questionEl) {
     currentQuestion = sanitizeAiText(data.reply);
     questionCount = data.state?.questionCount || questionCount + 1;
     questionHistory.push({ question: currentQuestion, answer: "" });
-    document.getElementById("question").textContent = currentQuestion;
+
+    const questionEl = document.getElementById("question");
+    if (questionEl) questionEl.textContent = currentQuestion;
+
+    const answerDisplay = document.getElementById("answerDisplay");
+    if (answerDisplay) {
+        answerDisplay.classList.add("answer-display-muted");
+    }
+
     updateProgress(data.state);
     updateJourney(data.state);
     setQuestionStatus("waiting");
@@ -241,6 +280,7 @@ async function endInterview() {
     if (submitBtn) submitBtn.disabled = true;
     if (recordBtn) recordBtn.disabled = true;
     if (stopBtn) stopBtn.disabled = true;
+
     if (startBtn) {
         startBtn.disabled = true;
         startBtn.textContent = "Interview ended";
@@ -261,23 +301,34 @@ async function endInterview() {
 function displayFeedback(feedback) {
     const reportEl = document.getElementById("reportSection");
     const reportContent = document.getElementById("reportContent");
+
+    if (!reportEl || !reportContent) return;
+
     reportEl.style.display = "block";
-    const block = (title, items) => `<h4>${title}</h4><ul>${(items || []).map(item => `<li>${item}</li>`).join("")}</ul>`;
+
+    const block = (title, items) => `
+        <h4>${escapeHtml(title)}</h4>
+        <ul>${(items || []).map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    `;
+
     reportContent.innerHTML = `
-        <p>${feedback.summary || "Interview completed."}</p>
+        <p>${escapeHtml(feedback.summary || "Interview completed.")}</p>
         ${block("Strengths", feedback.strengths)}
         ${block("Gaps", feedback.gaps)}
         ${block("Recommended Next Steps", feedback.next)}
     `;
-    reportEl.scrollIntoView({ behavior: "smooth" });
+
+    reportEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function startCountdownTimer() {
     timeRemaining = DURATION_SECONDS;
     updateTimerDisplay();
+
     interviewTimer = setInterval(() => {
         timeRemaining--;
         updateTimerDisplay();
+
         if (timeRemaining <= 0) {
             clearInterval(interviewTimer);
             endInterview();
@@ -289,28 +340,44 @@ function updateTimerDisplay() {
     const mins = Math.floor(timeRemaining / 60);
     const secs = timeRemaining % 60;
     const timerEl = document.getElementById("timer");
-    if (timerEl) timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+    if (timerEl) {
+        timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
 }
 
 function updateProgress(state) {
     const progressEl = document.getElementById("questionProgress");
-    if (progressEl) progressEl.textContent = `Question ${questionCount} of ${MAX_QUESTIONS}`;
     const barEl = document.getElementById("progressBar");
-    if (barEl) barEl.style.width = `${(questionCount / MAX_QUESTIONS) * 100}%`;
     const topic = state?.currentTopic;
-    if (topic) document.getElementById("topicBadge").textContent = `${topic.topic} · Day ${topic.day}`;
+
+    if (progressEl) progressEl.textContent = `Question ${questionCount} of ${MAX_QUESTIONS}`;
+    if (barEl) barEl.style.width = `${(questionCount / MAX_QUESTIONS) * 100}%`;
+
+    if (topic) {
+        const topicBadge = document.getElementById("topicBadge");
+        if (topicBadge) topicBadge.textContent = `${topic.topic} · Day ${topic.day}`;
+    }
 }
 
 function updateJourney(state) {
     const list = document.getElementById("journeyList");
     if (!list || !state?.plan) return;
+
     const currentDay = state.currentTopic?.day;
     const covered = new Set(state.coveredDays || []);
+
     list.innerHTML = state.plan.map(topic => {
-        const cls = topic.day === currentDay ? "journey-item active" : covered.has(topic.day) ? "journey-item done" : "journey-item";
-        return `<div class="${cls}"><span>Day ${topic.day}</span><strong>${topic.title}</strong></div>`;
+        const cls = topic.day === currentDay
+            ? "journey-item active"
+            : covered.has(topic.day)
+                ? "journey-item done"
+                : "journey-item";
+
+        return `<div class="${cls}"><span>Day ${topic.day}</span><strong>${escapeHtml(topic.title)}</strong></div>`;
     }).join("");
 }
+
 function setMediaMode(enabled) {
     mediaMode = Boolean(enabled);
 
@@ -325,7 +392,11 @@ function setMediaMode(enabled) {
 
 function switchToTextOnly(showMessage = true) {
     if (typeof stopRecording === "function" && typeof isRecording !== "undefined" && isRecording) {
-        try { stopRecording(); } catch (e) { console.warn("Could not stop recording", e); }
+        try {
+            stopRecording();
+        } catch (e) {
+            console.warn("Could not stop recording", e);
+        }
     }
 
     if (typeof stopMedia === "function") stopMedia();
@@ -356,8 +427,16 @@ function enableMediaMode() {
 function setQuestionStatus(state) {
     const indicator = document.getElementById("aiIndicator");
     if (!indicator) return;
+
     indicator.className = `ai-indicator ai-${state}`;
-    const labels = { thinking: "AI is thinking", waiting: "Waiting for answer", done: "Interview complete", error: "Error" };
+
+    const labels = {
+        thinking: "AI is thinking",
+        waiting: "Waiting for answer",
+        done: "Interview complete",
+        error: "Error"
+    };
+
     indicator.textContent = labels[state] || "Ready";
 }
 

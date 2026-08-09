@@ -287,4 +287,140 @@
     .ir-body .interview-right {
         padding-left: 0;
     }
+    .answer-composer {
+        position: relative;
+}
+
+.answer-textarea {
+    min-height: 190px;
+    resize: vertical;
+    padding-right: 64px;
+    line-height: 1.55;
+}
+
+.answer-actions {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-action {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.icon-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.icon-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.icon-submit {
+    background: var(--primary, #c8f000);
+    color: #111;
+}
+
+.icon-record {
+    background: #111827;
+    color: #ffffff;
+}
+
+.icon-stop {
+    background: var(--danger, #ef4444);
+    color: #ffffff;
+}
+
+.answer-display {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #374151;
+}
+
+.answer-display-muted {
+    opacity: 0.72;
+}
+
+.submitted-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+}
+
+.answer-display p {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.report-section {
+    position: relative;
+    z-index: 2;
+    clear: both;
+    margin-top: 24px;
+}
+
+
+@media (max-width: 760px) {
+    .answer-textarea {
+        min-height: 170px;
+        padding-right: 14px;
+        padding-bottom: 64px;
+    }
+
+    .answer-actions {
+        left: 12px;
+        right: auto;
+    }
+}
+
+.answer-composer {
+    position: relative;
+    width: 100%;
+}
+
+.answer-textarea {
+    width: 100%;
+    min-height: 240px;
+    resize: vertical;
+    padding: 18px 78px 18px 18px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.answer-actions {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-action {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    font-size: 1.15rem;
+}
 }

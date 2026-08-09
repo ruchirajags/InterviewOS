@@ -72,11 +72,21 @@
 
             <div class="card card-elevated" style="margin-bottom:16px;">
                 <label class="form-label" for="typedAnswer">Candidate Answer</label>
-                <textarea class="form-input" id="typedAnswer" rows="6" placeholder="Type your answer here. Voice recording is still available as an optional input."></textarea>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-                    <button class="btn btn-primary" id="submitAnswerBtn" onclick="submitTypedAnswer()" disabled>Submit Answer</button>
-                    <button class="btn btn-success" id="recordBtn" onclick="startRecording()" disabled>Record Answer</button>
-                    <button class="btn btn-danger" id="stopBtn" onclick="stopRecording()" disabled>Stop & Submit</button>
+                <div class="answer-composer">
+                <textarea class="form-input answer-textarea" id="typedAnswer" rows="8"
+                    placeholder="Type your answer here. Voice recording is still available as an optional input."></textarea>
+
+                <div class="answer-actions" aria-label="Answer actions">
+                    <button class="icon-action icon-submit" id="submitAnswerBtn" onclick="submitTypedAnswer()" disabled title="Submit answer" aria-label="Submit answer">
+                        ➤
+                    </button>
+                    <button class="icon-action icon-record" id="recordBtn" onclick="startRecording()" disabled title="Record answer" aria-label="Record answer">
+                        🎙
+                    </button>
+                    <button class="icon-action icon-stop" id="stopBtn" onclick="stopRecording()" disabled title="Stop and submit recording" aria-label="Stop and submit recording">
+                        ■
+                        </button>
+                    </div>
                 </div>
                 <div class="transcript-box" id="liveTranscript" style="display:none;"></div>
                 <div class="answer-display" id="answerDisplay"></div>

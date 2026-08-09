@@ -1,4 +1,4 @@
-﻿import re
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -67,47 +67,56 @@ class InterviewEngine:
         return {"reply": reply, "done": False, "state": self.public_state(state)}
 
     def turn(self, session_id, message):
-        state = self.sessions.get(session_id)
-        if not state:
-            return {"error": "Unknown sessionId. Start the interview with a candidate object."}, 404
-        if state.done:
-            return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state)}
+            state = self.sessions.get(session_id)
+            if not state:
+                return {"error": "Unknown sessionId. Start the interview with a candidate object."}, 404
+            if state.done:
+                return {"reply": "Interview completed.", "done": True, "feedback": self._feedback(state)}
 
-        quality = self._validate_answer_quality(message)
-        if not quality["valid"]:
-            current_question = state.last_question.get("question", "Please answer the previous question.")
-            return {
-                "reply": (
-                    "I couldn't understand that response clearly. "
-                    "Please retry with a complete, grammatical answer.\n\n"
-                    f"Question: {current_question}"
-                ),
-                "done": False,
-                "state": self.public_state(state),
-                "needs_retry": True,
-                "quality": quality,
+            quality = self._validate_answer_quality(message)
+            if not quality["valid"]:
+                current_question = state.last_question.get("question", "Please answer the previous question.")
+                return {
+                    "reply": (
+                        "I couldn't understand that response clearly. "
+                        "Please retry with a complete, grammatical answer.\n\n"
+                        f"Question: {current_question}"
+                    ),
+                    "done": False,
+                    "state": self.public_state(state),
+                    "needs_retry": True,
+                    "quality": quality,
             }
 
-        self._record_answer(state, message)
-        if state.question_count >= 10:
-            state.done = True
-            return {
-                "reply": "Interview completed.",
-                "done": True,
-                "feedback": self._feedback(state),
-                "transcript": state.transcript,
-            }
+            self._record_answer(state, message)
 
-        evaluation = state.evaluations[-1]
-        should_follow = state.topic_depth < 2 and (evaluation["score"] <= 2 or state.question_count in {3, 7})
-        if should_follow:
-            reply = self._ask_question(state, followup=self._followup(evaluation))
-        else:
-            state.topic_depth = 0
-            state.current_topic_index = min(state.current_topic_index + 1, len(state.plan) - 1)
-            reply = self._ask_question(state)
+            if self._should_complete(state):
+                state.done = True
+                return {
+                    "reply": "Interview completed.",
+                    "done": True,
+                    "feedback": self._feedback(state),
+                    "transcript": state.transcript,
+                }
 
-        return {"reply": reply, "done": False, "state": self.public_state(state)}
+            evaluation = state.evaluations[-1]
+            remaining_questions = max(0, 10 - state.question_count)
+            remaining_topics = max(0, len(state.plan) - state.current_topic_index - 1)
+
+            should_follow = (
+                state.topic_depth < 2
+                and remaining_questions > remaining_topics + 1
+                and (evaluation["score"] <= 2 or evaluation["score"] >= 4)
+            )
+
+            if should_follow:
+                reply = self._ask_question(state, followup=self._followup(evaluation))
+            else:
+                state.topic_depth = 0
+                state.current_topic_index = min(state.current_topic_index + 1, len(state.plan) - 1)
+                reply = self._ask_question(state)
+
+            return {"reply": reply, "done": False, "state": self.public_state(state)}
 
     def public_state(self, state):
         candidate = state.candidate.get("member", {})
@@ -218,10 +227,12 @@ class InterviewEngine:
         unique_words = set(words)
 
         technical_terms = {
-            "agent", "agents", "rag", "retrieval", "embedding", "embeddings",
-            "vector", "database", "prompt", "api", "mcp", "tool", "tools",
-            "model", "chunk", "chunks", "metadata", "deployment", "monitoring",
-            "latency", "eval", "evaluation", "schema", "json", "fallback"
+            "agent", "agents", "task", "tasks", "rag", "retrieval",
+            "embedding", "embeddings", "vector", "database", "prompt",
+            "api", "mcp", "tool", "tools", "model", "chunk", "chunks",
+            "metadata", "deployment", "monitoring", "latency", "eval",
+            "evaluation", "schema", "json", "fallback", "tradeoff",
+            "tradeoffs", "system", "workflow", "automation"
         }
 
         if not text:
@@ -266,6 +277,14 @@ class InterviewEngine:
             "strengths": hits[:3],
             "missing_concepts": missing,
         }
+
+    def _should_complete(self, state: InterviewState) -> bool:
+        answered = [item for item in state.transcript if item.get("answer")]
+        covered_days = {item["day"] for item in answered if item.get("day")}
+
+        minimum_days = min(8, len(state.plan))
+
+        return len(answered) >= 10 and len(covered_days) >= minimum_days
 
     def _followup(self, evaluation):
         day = evaluation["day"]

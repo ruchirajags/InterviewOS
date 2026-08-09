@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request, jsonify, render_template, Response
+from flask import Blueprint, request, jsonify, render_template, Response
 from models.interview import create_interview, save_answers, get_interview, save_report
 from services.candidate_analyzer import candidate_summary
 from services.cohort_data import curriculum_day_map, find_candidate, load_candidates
@@ -15,6 +15,10 @@ def validate_room_id(room_id):
     if not room_id or not re.match(r"^[A-Z0-9-]{1,80}$", room_id, re.I):
         return False
     return True
+
+@interview_bp.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 @interview_bp.route("/interview/create", methods=["GET"])
 def create_page():

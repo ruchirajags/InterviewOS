@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="InterviewOS candidate dashboard — select a cohort learner to begin an adaptive AI interview.">
+    <title>InterviewOS — Candidate Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body class="db-page" id="dbPage">
+
+    <!-- Hidden interview metadata (used by interview.js) -->
+    <input type="hidden" id="metaRole" value="">
+    <input type="hidden" id="metaName" value="">
+    <input type="hidden" id="metaCandidateId" value="">
+
+    <!-- Hidden audio element required by audio.js -->
+    <audio id="aiVoice" preload="none"></audio>
+
+    <div class="db-shell">
+
+        <!-- ── Top Navbar ──────────────────────────────────────────── -->
+        <header class="db-navbar">
+            <div class="db-navbar-left">
+                <a class="db-logo" href="/">
+                    <span class="db-logo-os">Interview</span><span>OS</span>
+                </a>
+                <nav class="db-nav">
+                    <a href="/">Home</a>
+                    <a href="/#how-it-works">How it works</a>
+                    <a href="#">For Teams</a>
+                </nav>
+            </div>
+            <div class="db-navbar-right">
+                <button class="db-theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ── Main Content ────────────────────────────────────────── -->
+        <div class="db-content">
+
+            <!-- ── Left Sidebar ───────────────────────────────────── -->
+            <aside class="db-sidebar" aria-label="Candidates">
+                <div class="db-sidebar-header">
+                    <div class="db-sidebar-title">
+                        <h2>Candidates</h2>
+                        <span class="db-candidate-count" id="candidateCount">—</span>
+                    </div>
+
+                    <div class="db-search">
+                        <svg class="db-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="candidateSearch" placeholder="Search candidates..."
+                            aria-label="Search candidates">
+                    </div>
+
+                    <span class="db-filter-label">Filter by Level</span>
+                    <div class="db-filter-pills" role="group" aria-label="Filter by level">
+                        <button class="db-filter-pill active" data-level="all" id="filterAll">All</button>
+                        <button class="db-filter-pill" data-level="advanced" id="filterAdvanced">Advanced</button>
+                        <button class="db-filter-pill" data-level="intermediate"
+                            id="filterIntermediate">Intermediate</button>
+                        <button class="db-filter-pill" data-level="foundational"
+                            id="filterFoundational">Foundational</button>
+                    </div>
+                </div>
+
+                <div class="db-candidate-list" id="candidateList" role="listbox" aria-label="Candidate list">
+                    <div class="db-list-empty">Loading candidates…</div>
+                </div>
+            </aside>
+
+            <!-- ── Right Panel ─────────────────────────────────────── -->
+            <main class="db-right" id="dbRight">
+
+                <!-- No selection state -->
+                <div class="db-no-selection" id="noSelection">
+                    <div class="db-no-selection-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>Select a candidate</h3>
+                    <p>Choose a learner from the left panel to begin an adaptive interview.</p>
+                </div>
+
+                <!-- Candidate panel (shown after selection) -->
+                <div id="candidatePanel" style="display:none; flex:1; flex-direction:column; overflow:hidden;">
+
+                    <!-- Candidate Info Header -->
+                    <div class="db-candidate-header">
+                        <h1 class="db-candidate-name-h1" id="infoName">—</h1>
+                        <div class="db-candidate-subtitle">
+                            <span id="infoRole">—</span>
+                            <span class="dot"></span>
+                            <span id="infoExp">—</span>
+                            <span class="dot"></span>
+                            <span id="infoLevelText">—</span>
+                        </div>
+                        <div class="db-meta-blocks">
+                            <div class="db-meta-block">
+                                <div class="db-meta-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="11" cy="11" r="7"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    Focus Area
+                                </div>
+                                <div class="db-meta-value" id="infoFocus">—</div>
+                            </div>
+                            <div class="db-meta-block">
+                                <div class="db-meta-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                    </svg>
+                                    Progress
+                                </div>
+                                <div class="db-meta-value" id="infoProgress">—</div>
+                            </div>
+                            <div class="db-meta-block">
+                                <div class="db-meta-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                    </svg>
+                                    Experience
+                                </div>
+                                <div class="db-meta-value" id="infoExpValue">—</div>
+                            </div>
+                            <div class="db-meta-block">
+                                <div class="db-meta-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                    Level
+                                </div>
+                                <div class="db-meta-value" id="infoLevelBadge">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status message -->
+                    <div class="db-status-msg" id="statusMsg" role="status" aria-live="polite"></div>
+
+                    <!-- Meta context row (shown once interview starts) -->
+                    <div class="db-meta-row" id="metaRow" style="display:none;">
+                        <span class="db-meta-pill" id="metaCandidateBadge"></span>
+                        <span class="db-meta-pill" id="metaRoomBadge"></span>
+                        <span class="db-meta-pill" id="questionProgress">Question 0 of 10</span>
+                        <span class="db-meta-pill" id="topicBadge">Topic pending</span>
+                        <span class="db-timer" id="timer" style="display:none;">20:00</span>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="db-progress-wrap">
+                        <div class="db-progress-fill" id="progressBar"></div>
+                    </div>
+
+                    <!-- ── Interview Workspace ───────────────────── -->
+                    <div class="db-workspace" id="interviewWorkspace">
+
+                        <!-- Video presence row -->
+                        <div class="db-ws-video">
+                            <div class="db-video-grid">
+                                <div class="db-video-wrapper">
+                                    <video id="localVideo" autoplay muted playsinline></video>
+                                    <div class="db-video-label">You</div>
+                                </div>
+                                <div class="db-video-wrapper">
+                                    <video id="remoteVideo" autoplay playsinline></video>
+                                    <div class="db-video-placeholder" id="remotePlaceholder">
+                                        <div class="db-video-placeholder-icon" aria-hidden="true">AI</div>
+                                        <span>AI interviewer presence</span>
+                                    </div>
+                                    <div class="db-video-label">AI Interviewer</div>
+                                </div>
+                            </div>
+                            <div class="db-control-bar">
+                                <button class="db-control-btn" id="muteBtn" onclick="toggleMute()">Mute</button>
+                                <button class="db-control-btn" id="videoBtn" onclick="toggleVideo()">Stop Video</button>
+                                <button class="db-control-btn danger" id="endSessionBtn" onclick="confirmEnd()">End
+                                    Session</button>
+                            </div>
+                        </div>
+
+                        <!-- AI Interviewer top section -->
+                        <div class="db-ws-ai">
+                            <div class="db-ws-ai-left">
+                                <span class="db-ws-label">AI Interviewer</span>
+                                <h2 class="db-ws-ai-headline" id="aiHeadline">Start the personalized interview.</h2>
+                                <p class="db-ws-ai-sub" id="question">
+                                    Click Start Interview to begin the personalized AI Cohort interview.
+                                    The interview will adapt based on candidate responses.
+                                </p>
+                                <button class="db-start-btn" id="startBtn" onclick="startInterview()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    Start Interview
+                                </button>
+                            </div>
+                            <div class="db-ws-ai-right">
+                                <div class="db-ws-status">
+                                    Interview Status
+                                    <span class="db-ws-status-badge" id="aiIndicator">Not Started</span>
+                                </div>
+                                <div>
+                                    <div class="db-ws-qnum" id="wsQnum">01</div>
+                                    <div class="db-ws-qnum-label">Question</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Journey + Answer -->
+                        <div class="db-ws-bottom">
+                            <div class="db-ws-journey">
+                                <span class="db-ws-section-label">Interview Journey</span>
+                                <div class="db-journey-list" id="journeyList">
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">01</span><span
+                                                class="db-journey-title">Introduction</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">02</span><span
+                                                class="db-journey-title">Core Questions</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">03</span><span
+                                                class="db-journey-title">Technical Deep Dive</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">04</span><span
+                                                class="db-journey-title">Scenario Based</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">05</span><span
+                                                class="db-journey-title">Behavioral</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                    <div class="db-journey-item">
+                                        <div class="db-journey-left"><span class="db-journey-num">06</span><span
+                                                class="db-journey-title">Summary &amp; Feedback</span></div><span
+                                            class="db-journey-status">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="db-ws-answer">
+                                <span class="db-ws-section-label">Candidate Answer</span>
+                                <div class="db-answer-hint">
+                                    Voice recording is available
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                                    </svg>
+                                </div>
+                                <textarea class="db-answer-textarea" id="typedAnswer" rows="5"
+                                    placeholder="Type your answer here…"></textarea>
+                                <div class="db-transcript-box" id="liveTranscript" style="display:none;"></div>
+                                <div class="db-answer-display" id="answerDisplay"></div>
+                            </div>
+                        </div>
+
+                        <!-- Report section -->
+                        <div class="db-report" id="reportSection">
+                            <div class="db-report-header">
+                                <span class="db-report-title">AI Engineering Readiness Report</span>
+                                <span class="db-report-badge">Complete</span>
+                            </div>
+                            <div class="db-report-content" id="reportContent"></div>
+                            <div class="db-report-actions">
+                                <a class="db-report-btn" id="downloadReportBtn" href="#" style="display:none;">Download
+                                    Report</a>
+                                <button class="db-report-btn" onclick="window.print()">Print</button>
+                            </div>
+                        </div>
+
+                    </div><!-- /db-workspace -->
+
+                </div><!-- /candidatePanel -->
+
+            </main>
+        </div><!-- /db-content -->
+
+        <!-- Action bar (always visible at bottom) -->
+        <div class="db-action-bar" id="actionBar">
+            <button class="db-action-btn" id="submitAnswerBtn" onclick="submitTypedAnswer()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Submit Answer
+            </button>
+            <button class="db-action-btn" id="recordBtn" onclick="startRecording()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                </svg>
+                Record Answer
+            </button>
+            <button class="db-action-btn danger" id="stopBtn" onclick="stopRecording()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                </svg>
+                Stop &amp; Submit
+            </button>
+        </div>
+
+    </div><!-- /db-shell -->
+
+    <!-- Permission Modal -->
+    <div id="permissionModal" class="db-modal-overlay" role="dialog" aria-modal="true">
+        <div class="db-modal">
+            <h3>Optional Camera and Microphone</h3>
+            <p>Video and voice make the room feel live, but the text interview works even if you skip permissions.</p>
+            <div class="db-modal-actions">
+                <button class="db-start-btn" onclick="requestPermissions()">Enable Media</button>
+                <button class="db-report-btn" onclick="skipPermissions()">Continue Text Only</button>
+            </div>
+            <div id="modalError" class="db-modal-error"></div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         SCRIPT BLOCK 1: Dashboard candidate list, filtering, selection,
+         theme toggle. NO interview.js dependencies here.
+         ================================================================ -->
+    <script>
+        const AVATAR_PALETTE = [
+            { bg: "#FF4FA3", text: "#FFFFFF" },
+            { bg: "#9B6DFF", text: "#FFFFFF" },
+            { bg: "#C8F000", text: "#111111" },
+            { bg: "#FF6B35", text: "#FFFFFF" },
+            { bg: "#E7DDC9", text: "#111111" },
+        ];
+
+        let allCandidates = [];
+        let selectedCandidate = null;
+        let activeLevel = "all";
+        let mediaRequested = false;
+
+        function initials(name) {
+            return (name || "?").split(" ").filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join("");
+        }
+
+        function focusAreaFor(summary) {
+            return (summary.probe_topics && summary.probe_topics[0]) ||
+                (summary.strong_topics && summary.strong_topics[0]) ||
+                "AI Engineering";
+        }
+
+        function levelLabel(difficulty) {
+            if (difficulty === "advanced") return "Advanced";
+            if (difficulty === "foundational") return "Foundational";
+            return "Intermediate";
+        }
+
+        function renderList(candidates) {
+            const list = document.getElementById("candidateList");
+            document.getElementById("candidateCount").textContent = candidates.length;
+            if (!candidates.length) {
+                list.innerHTML = `<div class="db-list-empty">No candidates match this filter.</div>`;
+                return;
+            }
+            list.innerHTML = candidates.map((c, i) => {
+                const member = c.member || {};
+                const analysis = (c.summary || {}).analysis || {};
+                const completed = (analysis.completed_days || []).length;
+                const palette = AVATAR_PALETTE[i % AVATAR_PALETTE.length];
+                const isSel = selectedCandidate && selectedCandidate.member?.id === member.id;
+                const origIdx = allCandidates.indexOf(c);
+                return `<div class="db-candidate-item${isSel ? " selected" : ""}"
+                     role="option" aria-selected="${isSel}"
+                     onclick="selectCandidate(allCandidates[${origIdx}])"
+                     id="ci-${member.id || i}">
+                    <span class="db-candidate-avatar" style="background:${palette.bg};color:${palette.text};" aria-hidden="true">${initials(member.name)}</span>
+                    <div class="db-candidate-info">
+                        <span class="db-candidate-name">${member.name || "Candidate"}</span>
+                        <span class="db-candidate-role">${member.jobRole || "AI Cohort Graduate"}</span>
+                    </div>
+                    <span class="db-candidate-progress">${completed} / 31</span>
+                </div>`;
+            }).join("");
+        }
+
+        function applyFilters() {
+            const query = (document.getElementById("candidateSearch").value || "").trim().toLowerCase();
+            let list = allCandidates;
+            if (activeLevel !== "all") {
+                list = list.filter(c => ((c.summary?.analysis?.difficulty) || "intermediate").toLowerCase() === activeLevel);
+            }
+            if (query) {
+                list = list.filter(c => {
+                    const m = c.member || {};
+                    return (m.name || "").toLowerCase().includes(query) || (m.jobRole || "").toLowerCase().includes(query);
+                });
+            }
+            renderList(list);
+        }
+
+        async function loadCandidates() {
+            document.getElementById("candidateList").innerHTML = `<div class="db-list-empty">Loading cohort profiles…</div>`;
+            try {
+                const data = await (await fetch("/api/candidates")).json();
+                allCandidates = data.candidates || [];
+                document.getElementById("candidateCount").textContent = allCandidates.length;
+                applyFilters();
+            } catch {
+                document.getElementById("candidateList").innerHTML = `<div class="db-list-empty">Could not load candidates.</div>`;
+            }
+        }
+
+        function selectCandidate(candidate) {
+            selectedCandidate = candidate;
+            const member = candidate.member || {};
+            const summary = candidate.summary || {};
+            const analysis = summary.analysis || {};
+            const completed = (analysis.completed_days || []).length;
+            const difficulty = (analysis.difficulty || "intermediate").toLowerCase();
+
+            // Set hidden inputs for interview.js
+            document.getElementById("metaRole").value = member.jobRole || "AI Cohort Graduate";
+            document.getElementById("metaName").value = member.name || "Candidate";
+            document.getElementById("metaCandidateId").value = member.id || "";
+
+            // Update info header
+            document.getElementById("infoName").textContent = (member.name || "Candidate").toUpperCase();
+            document.getElementById("infoRole").textContent = member.jobRole || "AI Cohort Graduate";
+            document.getElementById("infoExp").textContent = `${member.yearsExperience || 0} Years`;
+            document.getElementById("infoLevelText").textContent = levelLabel(difficulty);
+            document.getElementById("infoFocus").textContent = focusAreaFor(summary);
+            document.getElementById("infoProgress").textContent = `${String(completed).padStart(2, "0")} / 31`;
+            document.getElementById("infoExpValue").textContent = `${member.yearsExperience || 0} Years`;
+            document.getElementById("infoLevelBadge").innerHTML = `<span class="db-level-badge ${difficulty}">${levelLabel(difficulty)}</span>`;
+
+            document.getElementById("noSelection").style.display = "none";
+            document.getElementById("candidatePanel").style.display = "flex";
+
+            applyFilters(); // re-render with selection highlight
+            resetInterviewUI();
+
+            // Offer camera/mic once per session, the first time a candidate is opened.
+            if (!mediaRequested) {
+                mediaRequested = true;
+                document.getElementById("permissionModal").classList.add("open");
+            }
+        }
+
+        function resetInterviewUI() {
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el[typeof val === "string" && id === "typedAnswer" ? "value" : "textContent"] = val; };
+            const hide = id => { const el = document.getElementById(id); if (el) el.style.display = "none"; };
+            const disable = id => { const el = document.getElementById(id); if (el) el.disabled = true; };
+
+            set("question", "Click Start Interview to begin the personalized AI Cohort interview. The interview will adapt based on candidate responses.");
+            set("wsQnum", "01");
+
+            const ind = document.getElementById("aiIndicator");
+            if (ind) { ind.textContent = "Not Started"; ind.className = "db-ws-status-badge"; }
+
+            const startBtn = document.getElementById("startBtn");
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start Interview`;
+            }
+
+            ["submitAnswerBtn", "recordBtn", "stopBtn"].forEach(disable);
+
+            const ta = document.getElementById("typedAnswer"); if (ta) ta.value = "";
+            hide("answerDisplay"); hide("reportSection");
+            const lt = document.getElementById("liveTranscript"); if (lt) { lt.textContent = ""; lt.style.display = "none"; }
+
+            const sm = document.getElementById("statusMsg"); if (sm) { sm.style.display = "none"; sm.className = "db-status-msg"; }
+            hide("metaRow"); hide("timer");
+
+            const pb = document.getElementById("progressBar"); if (pb) pb.style.width = "0%";
+            set("questionProgress", "Question 0 of 10");
+            set("topicBadge", "Topic pending");
+
+            // Reset journey
+            const jl = document.getElementById("journeyList");
+            if (jl) jl.innerHTML = [
+                ["01", "Introduction"], ["02", "Core Questions"], ["03", "Technical Deep Dive"],
+                ["04", "Scenario Based"], ["05", "Behavioral"], ["06", "Summary &amp; Feedback"]
+            ].map(([n, t]) => `<div class="db-journey-item"><div class="db-journey-left"><span class="db-journey-num">${n}</span><span class="db-journey-title">${t}</span></div><span class="db-journey-status">Pending</span></div>`).join("");
+
+            // Reset interview.js globals (safe — uses typeof guard)
+            if (typeof questionHistory !== "undefined") questionHistory.length = 0;
+            if (typeof window.questionCount !== "undefined") window.questionCount = 0;
+            if (typeof window.interviewActive !== "undefined") window.interviewActive = false;
+            if (typeof window.timeRemaining !== "undefined") window.timeRemaining = 0;
+            if (typeof window.candidatePayload !== "undefined") window.candidatePayload = null;
+            if (typeof window.interviewTimer !== "undefined" && window.interviewTimer) {
+                clearInterval(window.interviewTimer); window.interviewTimer = null;
+            }
+            window.sessionId = crypto.randomUUID();
+        }
+
+        // ── Theme toggle ─────────────────────────────────────────────
+        let darkMode = false;
+        document.getElementById("themeToggle").addEventListener("click", () => {
+            darkMode = !darkMode;
+            document.getElementById("dbPage").classList.toggle("db-dark", darkMode);
+            document.getElementById("iconMoon").style.display = darkMode ? "none" : "";
+            document.getElementById("iconSun").style.display = darkMode ? "" : "none";
+        });
+
+        // ── Level filters ─────────────────────────────────────────────
+        document.querySelectorAll(".db-filter-pill").forEach(pill => {
+            pill.addEventListener("click", () => {
+                document.querySelectorAll(".db-filter-pill").forEach(p => p.classList.remove("active"));
+                pill.classList.add("active");
+                activeLevel = pill.dataset.level;
+                applyFilters();
+            });
+        });
+
+        document.getElementById("candidateSearch").addEventListener("input", applyFilters);
+
+        // ── Video placeholder (hides once the remote/AI stream plays) ──
+        document.getElementById("remoteVideo").addEventListener("play", () => {
+            const ph = document.getElementById("remotePlaceholder");
+            if (ph) ph.style.display = "none";
+        });
+
+        // ── Modal helpers (must be global for inline onclick) ─────────
+        function skipPermissions() { document.getElementById("permissionModal").classList.remove("open"); }
+        async function requestPermissions() {
+            if (typeof startMedia === "function") {
+                const ok = await startMedia();
+                if (ok) {
+                    document.getElementById("permissionModal").classList.remove("open");
+                    if (typeof joinRoom === "function") joinRoom("");
+                    showStatus("Media enabled.", "success");
+                } else {
+                    const e = document.getElementById("modalError"); e.textContent = "Permission denied."; e.style.display = "block";
+                }
+            } else { document.getElementById("permissionModal").classList.remove("open"); }
+        }
+        function confirmEnd() { if (confirm("End the interview and generate the report?")) { if (typeof endInterview === "function") endInterview(); } }
+
+        loadCandidates();
+    </script>
+
+    <!-- roomId defined before external scripts -->
+    <script>const roomId = "";</script>
+
+    <!-- External JS — load order matters. Overrides happen in the block BELOW. -->
+    <script src="/static/js/socket.js"></script>
+    <script src="/static/js/webrtc.js"></script>
+    <script src="/static/js/audio.js"></script>
+    <script src="/static/js/interview.js"></script>
+
+    <!-- ================================================================
+         SCRIPT BLOCK 2 — Post-load overrides.
+         All functions defined here WIN over socket.js / interview.js
+         because they are assigned to window.* AFTER those files run.
+         ================================================================ -->
+    <script>
+
+        // ── showStatus / showStatusHTML (override socket.js) ──────────
+        window.showStatus = function (msg, type) {
+            const el = document.getElementById("statusMsg");
+            if (!el) return;
+            el.textContent = msg;
+            el.className = `db-status-msg db-status-${type || "info"}`;
+            el.style.display = "block";
+            if (type === "success") setTimeout(() => { if (el.textContent === msg) el.style.display = "none"; }, 3000);
+        };
+        window.showStatusHTML = function (html, type) {
+            const el = document.getElementById("statusMsg");
+            if (!el) return;
+            el.innerHTML = html;
+            el.className = `db-status-msg db-status-${type || "info"}`;
+            el.style.display = "block";
+        };
+
+        // ── setQuestionStatus (override interview.js) ─────────────────
+        window.setQuestionStatus = function (state) {
+            const el = document.getElementById("aiIndicator");
+            if (!el) return;
+            el.className = "db-ws-status-badge";
+            el.textContent = { thinking: "AI Thinking…", waiting: "Waiting", done: "Complete", error: "Error" }[state] || "Ready";
+        };
+
+        // ── updateJourney (override interview.js) ─────────────────────
+        window.updateJourney = function (state) {
+            const list = document.getElementById("journeyList");
+            if (!list || !state?.plan) return;
+            const currentDay = state.currentTopic?.day;
+            const covered = new Set(state.coveredDays || []);
+            list.innerHTML = state.plan.map((topic, idx) => {
+                const num = String(idx + 1).padStart(2, "0");
+                let cls = "", label = "Pending";
+                if (topic.day === currentDay) { cls = " active"; label = "Active"; }
+                else if (covered.has(topic.day)) { cls = " done"; label = "Done"; }
+                return `<div class="db-journey-item${cls}"><div class="db-journey-left"><span class="db-journey-num">${num}</span><span class="db-journey-title">${topic.title}</span></div><span class="db-journey-status">${label}</span></div>`;
+            }).join("");
+        };
+
+        // ── updateProgress (override interview.js) ────────────────────
+        window.updateProgress = function (state) {
+            const qc = typeof questionCount !== "undefined" ? questionCount : 0;
+            const qEl = document.getElementById("questionProgress");
+            const bar = document.getElementById("progressBar");
+            const qnum = document.getElementById("wsQnum");
+            if (qEl) qEl.textContent = `Question ${qc} of 10`;
+            if (bar) bar.style.width = `${(qc / 10) * 100}%`;
+            if (qnum) qnum.textContent = String(qc).padStart(2, "0");
+
+            if (state?.currentTopic) {
+                const t = state.currentTopic;
+                const tb = document.getElementById("topicBadge");
+                if (tb) tb.textContent = `${t.topic} · Day ${t.day}`;
+            }
+
+            const mr = document.getElementById("metaRow");
+            if (mr && mr.style.display === "none") {
+                mr.style.display = "flex";
+                const name = document.getElementById("metaName")?.value || "Candidate";
+                const cb = document.getElementById("metaCandidateBadge");
+                const tm = document.getElementById("timer");
+                if (cb) cb.textContent = `Candidate: ${name}`;
+                if (tm) tm.style.display = "";
+            }
+        };
+
+        // ── updateTimerDisplay (override interview.js) ────────────────
+        window.updateTimerDisplay = function () {
+            const tr = typeof timeRemaining !== "undefined" ? timeRemaining : 0;
+            const el = document.getElementById("timer");
+            if (!el) return;
+            el.textContent = `${String(Math.floor(tr / 60)).padStart(2, "0")}:${String(tr % 60).padStart(2, "0")}`;
+            el.className = tr <= 120 ? "db-timer urgent" : "db-timer";
+        };
+
+        // ── displayFeedback (override interview.js) ───────────────────
+        window.displayFeedback = function (feedback) {
+            const re = document.getElementById("reportSection");
+            const rc = document.getElementById("reportContent");
+            if (!re || !rc) return;
+            re.style.display = "block";
+            const block = (t, items) => `<h4>${t}</h4><ul>${(items || []).map(i => `<li>${i}</li>`).join("")}</ul>`;
+            rc.innerHTML = `<p>${feedback.summary || "Interview completed."}</p>${block("Strengths", feedback.strengths)}${block("Gaps", feedback.gaps)}${block("Recommended Next Steps", feedback.next)}`;
+            re.scrollIntoView({ behavior: "smooth" });
+        };
+
+        // ── handleInterviewResponse patch ─────────────────────────────
+        const __origHIR = window.handleInterviewResponse;
+        window.handleInterviewResponse = function (data) {
+            __origHIR(data);
+            if (!data.error && !data.done) {
+                const h = document.getElementById("aiHeadline");
+                if (h) h.textContent = "AI Interviewer is asking:";
+            }
+            const qn = document.getElementById("wsQnum");
+            if (qn && typeof questionCount !== "undefined") qn.textContent = String(questionCount).padStart(2, "0");
+        };
+
+        // ── startInterview wrapper (override interview.js) ────────────
+        // Guards: candidate must be selected. Then calls the original.
+        const __origSI = window.startInterview;
+        window.startInterview = async function () {
+            if (!selectedCandidate) {
+                showStatus("Please select a candidate first.", "warning");
+                return;
+            }
+            window.sessionId = crypto.randomUUID();
+
+            const sb = document.getElementById("startBtn");
+            if (sb) { sb.disabled = true; sb.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Interview in progress`; }
+
+            const mr = document.getElementById("metaRow"); if (mr) mr.style.display = "flex";
+            const tm = document.getElementById("timer"); if (tm) tm.style.display = "";
+            const name = document.getElementById("metaName")?.value || "Candidate";
+            const cb = document.getElementById("metaCandidateBadge"); if (cb) cb.textContent = `Candidate: ${name}`;
+            const rb = document.getElementById("metaRoomBadge"); if (rb) rb.textContent = "Session active";
+
+            const sub = document.getElementById("submitAnswerBtn"); if (sub) sub.disabled = false;
+            const rec = document.getElementById("recordBtn"); if (rec) rec.disabled = false;
+
+            await __origSI();
+        };
+
+    </script>
+
+</body>
+
+</html>

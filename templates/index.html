@@ -1,96 +1,315 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="InterviewOS adaptive AI interviewer for AI Cohort graduates.">
     <title>InterviewOS - AI Cohort Interviewer</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/landing.css">
 </head>
-<body>
-<header class="header">
-    <a class="logo" href="/">
-        <div class="logo-icon">AI</div>
-        <span class="logo-text">InterviewOS</span>
-    </a>
-    <span class="header-badge">Cohort Demo</span>
-</header>
 
-<main class="container">
-    <section class="hero">
-        <div class="hero-eyebrow"><span>Adaptive Interview Agent</span></div>
-        <h1 class="hero-title">Build the interviewer,<br>not the interview.</h1>
-        <p class="hero-subtitle">
-            InterviewOS reads each learner's 31-day AI Cohort journey, plans a personalized technical interview,
-            asks adaptive follow-ups, and generates a downloadable readiness report.
-        </p>
-        <a href="#candidates" class="btn btn-primary btn-lg">Open Candidate Dashboard</a>
-    </section>
+<body class="landing-page">
 
-    <section id="candidates" style="padding: 20px 0 70px;">
-        <div class="section-head">
-            <div>
-                <h2>Candidate Dashboard</h2>
-                <p style="color: var(--text-secondary);">Select a cohort learner to create a dedicated interview room.</p>
+    <header class="l-header-bar">
+        <div class="l-container">
+            <div class="l-header">
+                <a class="l-logo" href="/">
+                    <span class="l-logo-os">Interview</span><span>OS</span>
+                </a>
+                <nav class="l-nav l-nav-mobile-hide">
+                    <a href="#how-it-works">How it works</a>
+                </nav>
+                <a class="l-header-cta" href="/dashboard">
+                    DASHBOARD
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round" width="14" height="14">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
             </div>
         </div>
-        <div id="candidateGrid" class="candidate-grid"></div>
-    </section>
-</main>
-
-<script>
-async function loadCandidates() {
-    const grid = document.getElementById("candidateGrid");
-    grid.innerHTML = "<p style='color: var(--text-secondary);'>Loading cohort profiles...</p>";
-    const res = await fetch("/api/candidates");
-    const data = await res.json();
-    grid.innerHTML = "";
-    data.candidates.forEach(candidate => {
-        const member = candidate.member || {};
-        const summary = candidate.summary || {};
-        const analysis = summary.analysis || {};
-        const card = document.createElement("article");
-        card.className = "card candidate-card fade-in";
-        card.innerHTML = `
-            <div class="candidate-topline">
-                <div>
-                    <h3>${member.name}</h3>
-                    <p>${member.jobRole || "AI Cohort Graduate"} · ${member.yearsExperience || 0} yrs</p>
+    </header>
+ 
+    <div class="l-container">
+        <section class="l-hero">
+            <div class="l-hero-left">
+                <h1 class="l-headline">Build the<br>interviewer,<br>not the <span class="l-highlight">interview</span>.
+                </h1>
+                <p class="l-hero-copy">
+                    InterviewOS reads each learner's 31-day AI cohort journey, plans a personalized
+                    technical interview, asks adaptive follow-ups, and generates evidence-based
+                    readiness reports.
+                </p>
+                <a class="l-cta-primary" href="/dashboard">
+                    Open Candidate Dashboard
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                <div class="l-signals">
+                    <div class="l-signal">
+                        <span class="l-signal-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="17" rx="1"></rect>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                            </svg>
+                        </span>
+                        <span class="l-signal-text">31-Day<br>Curriculum</span>
+                    </div>
+                    <span class="l-signal-divider"></span>
+                    <div class="l-signal">
+                        <span class="l-signal-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 12 8 12 10 6 14 18 16 12 21 12"></polyline>
+                            </svg>
+                        </span>
+                        <span class="l-signal-text">Adaptive<br>Questioning</span>
+                    </div>
+                    <span class="l-signal-divider"></span>
+                    <div class="l-signal">
+                        <span class="l-signal-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="8" y1="13" x2="16" y2="13"></line>
+                                <line x1="8" y1="17" x2="13" y2="17"></line>
+                            </svg>
+                        </span>
+                        <span class="l-signal-text">Evidence-Based<br>Feedback</span>
+                    </div>
                 </div>
-                <span class="meta-badge">${analysis.difficulty || "intermediate"}</span>
             </div>
-            <div class="candidate-stats">
-                <span>${(analysis.completed_days || []).length} completed days</span>
-                <span>${candidate.signals?.commitDays || 0} commit days</span>
-                <span>${candidate.signals?.missionsFirstTry || 0} first try</span>
+
+            <div class="l-hero-right">
+                <div class="l-dot-grid" aria-hidden="true"></div>
+                <div class="l-preview">
+                    <div class="l-preview-top">
+                        <span class="l-preview-title">LIVE INTERVIEW PREVIEW</span>
+                        <span class="l-preview-live-dot"></span>
+                    </div>
+                    <div class="l-preview-meta">
+                        <span>QUESTION 03 / 08</span>
+                        <span>TOPIC: <em>VECTOR DATABASES</em></span>
+                    </div>
+                    <h3 class="l-preview-question">How would you diagnose poor retrieval quality in production?</h3>
+                    <span class="l-preview-label">CANDIDATE RESPONSE</span>
+                    <div class="l-preview-response">
+                        I would start by checking embedding quality, then look at the index freshness and the retrieval
+                        query.
+                    </div>
+                    <span class="l-preview-label">FOLLOW-UP</span>
+                    <p class="l-preview-followup">
+                        Good start. How would you evaluate whether the issue is with the embeddings or the retrieval
+                        strategy?
+                    </p>
+                    <div class="l-preview-progress">
+                        <div class="l-preview-progress-head"><span>SESSION PROGRESS</span><span>37%</span></div>
+                        <div class="l-preview-bar">
+                            <div class="l-preview-bar-fill" style="--fill:37%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="topic-list"><strong>Strong:</strong> ${(summary.strong_topics || []).slice(0,3).join(", ") || "Needs interview evidence"}</div>
-            <div class="topic-list"><strong>Probe:</strong> ${(summary.probe_topics || []).slice(0,3).join(", ") || "Production tradeoffs"}</div>
-            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:18px;" onclick='createRoom(${JSON.stringify(candidate)})'>Start Interview</button>
-        `;
-        grid.appendChild(card);
-    });
-}
+        </section>
+    </div>
 
-async function createRoom(candidate) {
-    const member = candidate.member || {};
-    const roomId = `${member.id}-${Math.random().toString(36).substring(2, 6)}`.toUpperCase();
-    const res = await fetch("/api/interview/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            room_id: roomId,
-            candidate_id: member.id,
-            candidate_name: member.name,
-            role: member.jobRole || "AI Cohort Graduate"
-        })
-    });
-    const data = await res.json();
-    if (data.status === "created") window.location.href = `/interview/${data.room_id}`;
-    else alert(data.error || "Could not create interview room");
-}
+    <div class="l-marquee">
+        <div class="l-marquee-track">
+            <span class="l-marquee-item">BUILT FOR THE ABTALKS HACKATHON</span>
+            <span class="l-marquee-dot">•</span>
+            <span class="l-marquee-item">INTERVIEWOS × ABTALKS</span>
+            <span class="l-marquee-dot">•</span>
+            <span class="l-marquee-item">BUILD. SHIP. IMPACT.</span>
+            <span class="l-marquee-dot">•</span>
+            <a class="l-marquee-item l-marquee-link" href="https://www.abtalks.in/hackathon/submission" target="_blank"
+                rel="noopener noreferrer">EXPLORE THE HACKATHON →</a>
+            <span class="l-marquee-dot">•</span>
+            <span class="l-marquee-item" aria-hidden="true">BUILT FOR THE ABTALKS HACKATHON</span>
+            <span class="l-marquee-dot" aria-hidden="true">•</span>
+            <span class="l-marquee-item" aria-hidden="true">INTERVIEWOS × ABTALKS</span>
+            <span class="l-marquee-dot" aria-hidden="true">•</span>
+            <span class="l-marquee-item" aria-hidden="true">BUILD. SHIP. IMPACT.</span>
+            <span class="l-marquee-dot" aria-hidden="true">•</span>
+            <a class="l-marquee-item l-marquee-link" href="https://www.abtalks.in/hackathon/submission" target="_blank"
+                rel="noopener noreferrer" aria-hidden="true" tabindex="-1">EXPLORE THE HACKATHON →</a>
+            <span class="l-marquee-dot" aria-hidden="true">•</span>
+        </div>
+    </div>
 
-loadCandidates();
-</script>
+    <section class="l-metrics l-reveal">
+        <div class="l-container">
+            <div class="l-metrics-inner">
+                <div class="l-metric">
+                    <span class="l-metric-icon l-metric-icon--pink">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <div><strong class="l-metric-value">10,000+</strong><span class="l-metric-label">Learners</span>
+                    </div>
+                </div>
+                <span class="l-metric-divider"></span>
+                <div class="l-metric">
+                    <span class="l-metric-icon l-metric-icon--lime">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 12 8 12 10 6 14 18 16 12 21 12"></polyline>
+                        </svg>
+                    </span>
+                    <div><strong class="l-metric-value">8+</strong><span class="l-metric-label">Questions per
+                            interview</span></div>
+                </div>
+                <span class="l-metric-divider"></span>
+                <div class="l-metric">
+                    <span class="l-metric-icon l-metric-icon--beige">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="13" y2="17"></line>
+                        </svg>
+                    </span>
+                    <div><strong class="l-metric-value">Actionable</strong><span class="l-metric-label">Readiness
+                            reports</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="l-how l-reveal" id="how-it-works">
+        <div class="l-how-decor" aria-hidden="true">
+            <svg viewBox="0 0 220 220" fill="none">
+                <g stroke="#FF4FA3" stroke-width="1.4" stroke-linecap="round">
+                    <line x1="110" y1="110" x2="110" y2="20"></line>
+                    <line x1="110" y1="110" x2="180" y2="55"></line>
+                    <line x1="110" y1="110" x2="200" y2="110"></line>
+                    <line x1="110" y1="110" x2="180" y2="165"></line>
+                    <line x1="110" y1="110" x2="110" y2="200"></line>
+                    <line x1="110" y1="110" x2="40" y2="165"></line>
+                    <line x1="110" y1="110" x2="20" y2="110"></line>
+                    <line x1="110" y1="110" x2="40" y2="55"></line>
+                </g>
+                <circle cx="110" cy="110" r="7" fill="#C8F000"></circle>
+                <circle cx="110" cy="20" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="180" cy="55" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="200" cy="110" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="180" cy="165" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="110" cy="200" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="40" cy="165" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="20" cy="110" r="3.5" fill="#FF4FA3"></circle>
+                <circle cx="40" cy="55" r="3.5" fill="#FF4FA3"></circle>
+            </svg>
+        </div>
+        <div class="l-container">
+            <span class="l-section-number">02</span>
+            <h2 class="l-section-title l-section-title--dark">How InterviewOS Works</h2>
+            <div class="l-steps">
+                <div class="l-step">
+                    <span class="l-step-num">01</span>
+                    <span class="l-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                    <h3 class="l-step-title">Understand the learner</h3>
+                    <p class="l-step-desc">We analyze 31-day progress, missions completed, and learning signals from the AB Talks platform to understand each learner’s strengths and gaps.</p>
+                </div>
+                <span class="l-step-arrow">
+                    <svg viewBox="0 0 24 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="0" y1="7" x2="20" y2="7" stroke-dasharray="3 3"></line>
+                        <polyline points="15 1 22 7 15 13"></polyline>
+                    </svg>
+                </span>
+                <div class="l-step">
+                    <span class="l-step-num">02</span>
+                    <span class="l-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </span>
+                    <h3 class="l-step-title">Run adaptive interview</h3>
+                    <p class="l-step-desc">We ask contextual questions and adapt based on every answer.</p>
+                </div>
+                <span class="l-step-arrow">
+                    <svg viewBox="0 0 24 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="0" y1="7" x2="20" y2="7" stroke-dasharray="3 3"></line>
+                        <polyline points="15 1 22 7 15 13"></polyline>
+                    </svg>
+                </span>
+                <div class="l-step">
+                    <span class="l-step-num">03</span>
+                    <span class="l-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="13" y2="17"></line>
+                        </svg>
+                    </span>
+                    <h3 class="l-step-title">Generate readiness report</h3>
+                    <p class="l-step-desc">We produce actionable feedback and topic recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="l-footer l-reveal">
+        <div class="l-container">
+
+            <div class="l-footer-bottom">
+                <span class="l-footer-copy">© 2026 InterviewOS. All rights reserved.</span>
+                <div class="l-footer-social">
+                    <a href="#">GitHub</a>
+                    <a href="#">LinkedIn</a>
+                    <a href="mailto:hello@interviewos.app">Email</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var revealEls = document.querySelectorAll(".l-reveal");
+
+            if (reducedMotion || !("IntersectionObserver" in window)) {
+                revealEls.forEach(function (el) { el.classList.add("l-reveal--visible"); });
+                return;
+            }
+
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("l-reveal--visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            revealEls.forEach(function (el) { observer.observe(el); });
+        })();
+    </script>
 </body>
+
 </html>

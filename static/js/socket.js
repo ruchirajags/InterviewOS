@@ -1,4 +1,4 @@
-// socket.js — VivaAI WebSocket client
+// socket.js — InterviewOs WebSocket client
 
 const socket = io({
     transports: ["websocket", "polling"],

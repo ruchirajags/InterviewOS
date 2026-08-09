@@ -1,6 +1,6 @@
 ﻿# InterviewOS File Architecture
 
-This project is a trimmed hackathon build based on the VivaAI interview-room boilerplate.
+This project is a trimmed hackathon build based on the InterviewOs interview-room boilerplate.
 
 ## Tech Stack
 
@@ -8,7 +8,7 @@ This project is a trimmed hackathon build based on the VivaAI interview-room boi
 - Flask-SocketIO: real-time signaling support for the existing video/WebRTC room.
 - Vanilla HTML/CSS/JavaScript: no frontend build step, fast to deploy/debug.
 - Pydantic: request validation for API payloads.
-- Sarvam AI SDK: optional TTS/STT support inherited from VivaAI.
+- Sarvam AI SDK: optional TTS/STT support inherited from InterviewOs.
 - In-memory Python dictionaries: session/report state for the hackathon demo.
 - JSON files: supplied curriculum and candidate profiles.
 
@@ -143,7 +143,7 @@ Important endpoints:
 
 ### routes/ai_routes.py
 
-Legacy VivaAI optional AI routes:
+Legacy InterviewOs optional AI routes:
 
 - `/api/ai/question`
 - `/api/ai/report`
@@ -198,7 +198,7 @@ Contains:
 
 Design system and page styling.
 
-Includes old VivaAI styles plus new candidate dashboard, journey, typed-answer, and report styles.
+Includes old InterviewOs styles plus new candidate dashboard, journey, typed-answer, and report styles.
 
 ### static/js/interview.js
 
@@ -259,7 +259,7 @@ Optional text-to-speech helper for AI interviewer voice.
 
 ### utils/validation.py
 
-Pydantic request models for both legacy VivaAI endpoints and the required hackathon endpoint.
+Pydantic request models for both legacy InterviewOs endpoints and the required hackathon endpoint.
 
 ### utils/sanitization.py
 

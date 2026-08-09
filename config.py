@@ -5,7 +5,7 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "vivaai-secret")
+    SECRET_KEY = os.environ.get("SECRET_KEY", "InterviewOs-secret")
 
     SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "")
     SARVAM_CHAT_MODEL = os.environ.get("SARVAM_CHAT_MODEL", "sarvam-m")
@@ -24,6 +24,6 @@ class Config:
     AUDIO_FOLDER = "static/audio/questions"
     ANSWERS_FOLDER = "static/audio/answers"
 
-    DATABASE_PATH = "database/vivaai.db"
+    DATABASE_PATH = "database/InterviewOs.db"
 
     STUN_SERVER = "stun:stun.l.google.com:19302"
